@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import { useAppStore } from './store/appStore';
 
+const Home = lazy(() => import('./routes/Home'));
 const Edit = lazy(() => import('./routes/Edit'));
-
-function Home() {
-  return <div className="p-4 text-gray-700">Dress Tour Sketchbook — Home (T9)</div>;
-}
+const Summary = lazy(() => import('./routes/Summary'));
 
 function LoadingFallback() {
   return (
@@ -16,6 +15,16 @@ function LoadingFallback() {
 }
 
 export default function App() {
+  const hydrated = useAppStore((s) => s.hydrated);
+
+  useEffect(() => {
+    useAppStore.getState().hydrate();
+  }, []);
+
+  if (!hydrated) {
+    return <LoadingFallback />;
+  }
+
   return (
     <BrowserRouter>
       <Suspense fallback={<LoadingFallback />}>
@@ -23,6 +32,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/edit/:id" element={<Edit />} />
           <Route path="/new" element={<Edit />} />
+          <Route path="/summary" element={<Summary />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
