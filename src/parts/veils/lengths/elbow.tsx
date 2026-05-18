@@ -1,5 +1,6 @@
 import type { VeilLengthDef } from '../types';
-import { veilBackPath, veilFrontPath, VeilShape } from './veilShape';
+import { veilBackPath, veilFrontPath } from './veilShape.helpers';
+import { VeilShape } from './veilShape';
 
 const BOTTOM_Y = 250;
 

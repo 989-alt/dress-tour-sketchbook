@@ -1,5 +1,6 @@
 import type { VeilLengthDef } from '../types';
-import { veilFrontPath, VeilShape } from './veilShape';
+import { veilFrontPath } from './veilShape.helpers';
+import { VeilShape } from './veilShape';
 
 export const blusher: VeilLengthDef = {
   type: 'blusher',
