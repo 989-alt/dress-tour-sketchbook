@@ -4,7 +4,7 @@ import { composeDress } from './compose';
 import { COLOR_HEX } from './colorPalette';
 import { createDefaultEntry } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
-import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial, BackType } from '../types';
+import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial, BackType, FabricType } from '../types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -60,25 +60,28 @@ describe('composeDress — 12 triangles per silhouette', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Test 3: Color — blush primary renders the blush hex fill
+// Test 3: Color — the fabric def id references the primary color
 // ---------------------------------------------------------------------------
 describe('composeDress — color fill', () => {
-  it('renders fill with blush hex when color.primary is blush', () => {
+  it('renders fabric-satin-blush def when color.primary is blush', () => {
     const anchors = anchorSetFromRef('aline');
     const entry = createDefaultEntry('t3', anchors);
     entry.color.primary = 'blush';
     const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
 
-    expect(html).toContain(`fill="${COLOR_HEX.blush}"`);
+    expect(html).toContain('fabric-satin-blush');
+    // blush hex appears inside the fabric def as stop-color
+    expect(html).toContain(COLOR_HEX.blush);
   });
 
-  it('renders fill with ivory hex when color.primary is ivory', () => {
+  it('renders fabric-satin-ivory def when color.primary is ivory', () => {
     const anchors = anchorSetFromRef('sheath');
     const entry = createDefaultEntry('t3b', anchors);
     entry.color.primary = 'ivory';
     const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
 
-    expect(html).toContain(`fill="${COLOR_HEX.ivory}"`);
+    expect(html).toContain('fabric-satin-ivory');
+    expect(html).toContain(COLOR_HEX.ivory);
   });
 });
 
@@ -255,13 +258,15 @@ describe('composeDress — sleeve rendering (T12)', () => {
     expect(html).toContain('C 110 130');
   });
 
-  it('opaque material: fill is colorHex without extra opacity attribute', () => {
+  it('opaque material: fill references fabric url with blush color', () => {
     const anchors = anchorSetFromRef('aline');
     const entry = createDefaultEntry('t10-opaque', anchors);
     entry.sleeve = { type: 'long', material: 'opaque' };
     entry.color.primary = 'blush';
     const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
-    expect(html).toContain(`fill="${COLOR_HEX.blush}"`);
+    // sleeve fill uses url(#fabric-satin-blush) since default sleeves fabric is satin
+    expect(html).toContain('url(#');
+    expect(html).toContain('fabric-satin-blush');
   });
 
   it('sheer material: opacity attribute is 0.3', () => {
@@ -272,13 +277,14 @@ describe('composeDress — sleeve rendering (T12)', () => {
     expect(html).toContain('opacity="0.3"');
   });
 
-  it('lace material: fill references lace pattern url', () => {
+  it('lace material: fill references a fabric url', () => {
     const anchors = anchorSetFromRef('aline');
     const entry = createDefaultEntry('t10-lace', anchors);
     entry.sleeve = { type: 'long', material: 'lace' };
     const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
     expect(html).toContain('url(#');
-    expect(html).toContain('lace-pattern');
+    // The default fabric for sleeves is satin, so we see a fabric url
+    expect(html).toContain('fabric-satin');
   });
 
   it('all 10 sleeve types render without throwing', () => {
@@ -308,12 +314,14 @@ describe('composeDress — sleeve rendering (T12)', () => {
     }
   });
 
-  it('lace pattern def is present in SVG', () => {
+  it('fabric defs are present in SVG for default entry', () => {
     const anchors = anchorSetFromRef('aline');
     const entry = createDefaultEntry('t10-defs', anchors);
     const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
-    expect(html).toContain('lace-pattern');
-    expect(html).toContain('beaded-pattern');
+    // Default entry uses satin for bodice/skirt/sleeves
+    expect(html).toContain('fabric-satin');
+    // Default veil fabric is tulle
+    expect(html).toContain('fabric-tulle');
   });
 });
 
@@ -516,5 +524,76 @@ describe('composeDress — back hint (T14)', () => {
         renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
       ).not.toThrow();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 15 (T15): Fabric defs are rendered in the SVG
+// ---------------------------------------------------------------------------
+describe('composeDress — fabric defs (T15)', () => {
+  it('lace bodice: renders lace fabric def and fill url reference', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t15-lace', anchors);
+    entry.fabric.bodice = 'lace';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    // Fabric def id for lace+pureWhite should appear
+    expect(html).toContain('fabric-lace-pureWhite');
+    // Fill url reference
+    expect(html).toContain('url(#');
+  });
+
+  it('taffeta bodice: renders taffeta fabric def', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t15-taffeta', anchors);
+    entry.fabric.bodice = 'taffeta';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('fabric-taffeta-pureWhite');
+  });
+
+  it('silhouette fill uses url(#...fabric-{bodice}-{color})', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t15-url', anchors);
+    entry.fabric.bodice = 'organza';
+    entry.color.primary = 'ivory';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('url(#');
+    expect(html).toContain('fabric-organza-ivory');
+  });
+
+  it('all 7 fabric types render without throwing for bodice', () => {
+    const fabrics: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta'];
+    const anchors = anchorSetFromRef('aline');
+    for (const fabric of fabrics) {
+      const entry = createDefaultEntry(`t15-all-${fabric}`, anchors);
+      entry.fabric.bodice = fabric;
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+
+  it('de-duplicates fabric defs when bodice=skirt=sleeves=satin', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t15-dedup', anchors);
+    // All three use satin; veil uses tulle (default)
+    // Should produce only 2 unique fabric defs: satin + tulle
+    entry.fabric.bodice = 'satin';
+    entry.fabric.skirt = 'satin';
+    entry.fabric.sleeves = 'satin';
+    entry.fabric.veil = 'tulle';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    // satin def appears once
+    const satinMatches = (html.match(/id="fabric-satin-/g) ?? []).length;
+    expect(satinMatches).toBe(1);
+    // tulle def appears once
+    const tulleMatches = (html.match(/id="fabric-tulle-/g) ?? []).length;
+    expect(tulleMatches).toBe(1);
+  });
+
+  it('idPrefix is included in fabric def id', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t15-prefix', anchors);
+    const html = renderToStaticMarkup(composeDress(entry, anchors, { ...DEFAULT_OPTIONS, idPrefix: 'p1-' }));
+    expect(html).toContain('id="p1-fabric-satin-pureWhite"');
   });
 });

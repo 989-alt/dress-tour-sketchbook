@@ -1,10 +1,11 @@
 import type { ReactElement } from 'react';
-import type { DressEntry, AnchorSet } from '../types';
+import type { DressEntry, AnchorSet, FabricType, ColorEnum } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
 import { NECKLINES } from '../parts/necklines';
 import { SLEEVES } from '../parts/sleeves';
 import { STRUCTURES, ACCENTS, WAIST_Y_OFFSET } from '../parts/bodices';
 import { BACKS } from '../parts/backs';
+import { FABRICS } from '../parts/fabrics';
 import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -20,6 +21,29 @@ export interface ComposeOptions {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/** Build the SVG def id for a fabric+color pair. */
+function fabricDefId(idPrefix: string, fabric: FabricType, color: ColorEnum): string {
+  return `${idPrefix}fabric-${fabric}-${color}`;
+}
+
+/**
+ * Render the unique fabric <defs> elements needed by this entry.
+ * We only render the defs actually used (bodice + sleeves), de-duplicated.
+ */
+function renderFabricDefs(entry: DressEntry, idPrefix: string): ReactElement[] {
+  const color = entry.color.primary;
+  const colorHex = COLOR_HEX[color];
+  const used = new Set<FabricType>([
+    entry.fabric.bodice,
+    entry.fabric.skirt,
+    entry.fabric.sleeves,
+    entry.fabric.veil,
+  ]);
+  return Array.from(used).map((fabric) =>
+    FABRICS[fabric].renderDef({ idPrefix, color, colorHex }),
+  );
+}
+
 /** Render the 12 warped silhouette triangles as clipPath+g pairs. */
 function renderSilhouette(
   entry: DressEntry,
@@ -28,7 +52,7 @@ function renderSilhouette(
 ): ReactElement {
   const def = SILHOUETTES[entry.silhouette];
   const warps = meshWarp(def.referencePose, entry.anchors ?? anchors);
-  const fill = COLOR_HEX[entry.color.primary];
+  const fill = `url(#${fabricDefId(idPrefix, entry.fabric.bodice, entry.color.primary)})`;
 
   const clipPaths = warps.map((w, idx) => {
     const [p0, p1, p2] = w.clipTriangleInSrcSpace;
@@ -86,19 +110,17 @@ function renderSleeves(
 
   const colorHex = COLOR_HEX[entry.color.primary];
   const { material } = entry.sleeve;
+  const sleeveFabricFill = `url(#${fabricDefId(idPrefix, entry.fabric.sleeves, entry.color.primary)})`;
 
-  // T15 will expand fabric patterns; for now we use opacity for sheer/lace/beaded.
-  // lace and beaded patterns are defined in <defs> and referenced by fill.
+  // Use fabric fill for the sleeve; material modifiers override for sheer/beaded
   let fillProps: Record<string, string | number>;
   if (material === 'sheer') {
     fillProps = { fill: colorHex, opacity: 0.3 };
-  } else if (material === 'lace') {
-    fillProps = { fill: `url(#${idPrefix}lace-pattern)`, stroke: colorHex, strokeWidth: '0.5' };
   } else if (material === 'beaded') {
     fillProps = { fill: colorHex, opacity: 0.85 };
   } else {
-    // opaque
-    fillProps = { fill: colorHex };
+    // opaque or lace — use the fabric def fill
+    fillProps = { fill: sleeveFabricFill };
   }
 
   return (
@@ -202,15 +224,9 @@ export function composeDress(
       height={photoHeight}
       viewBox={`0 0 ${photoWidth} ${photoHeight}`}
     >
-      {/* Material patterns for sleeves — T15 will expand these */}
+      {/* Fabric defs for the current entry */}
       <defs>
-        <pattern id={`${idPrefix}lace-pattern`} patternUnits="userSpaceOnUse" width="8" height="8">
-          <circle cx="2" cy="2" r="0.8" fill="white" stroke="#cccccc" strokeWidth="0.3" />
-          <circle cx="6" cy="6" r="0.8" fill="white" stroke="#cccccc" strokeWidth="0.3" />
-        </pattern>
-        <pattern id={`${idPrefix}beaded-pattern`} patternUnits="userSpaceOnUse" width="6" height="6">
-          <circle cx="3" cy="3" r="1.2" fill="#eeeeee" />
-        </pattern>
+        {renderFabricDefs(entry, idPrefix)}
       </defs>
       {renderSilhouette(entry, anchors, idPrefix)}
       {/* T12: sleeve layer */}
