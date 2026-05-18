@@ -64,4 +64,11 @@ describe('PhotoUploadModal', () => {
     render(<PhotoUploadModal onClose={vi.fn()} />);
     expect(screen.getByText('베이스 사진 업로드')).toBeInTheDocument();
   });
+
+  it('calls onClose when Escape is pressed (idle status)', () => {
+    const onClose = vi.fn();
+    render(<PhotoUploadModal onClose={onClose} />);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledOnce();
+  });
 });

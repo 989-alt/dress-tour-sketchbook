@@ -6,7 +6,8 @@ import { EntryCard } from '../components/EntryCard';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { meta, entries } = useAppStore();
+  const meta = useAppStore((s) => s.meta);
+  const entries = useAppStore((s) => s.entries);
   const [showUpload, setShowUpload] = useState(false);
 
   const hasPhoto = Boolean(meta?.basePhoto);

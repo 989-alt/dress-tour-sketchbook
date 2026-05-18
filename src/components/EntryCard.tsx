@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { composeDress } from '../lib/compose';
 import type { DressEntry } from '../types';
 
@@ -12,11 +13,10 @@ const CARD_H = 240;
 export function EntryCard({ entry, onClick }: EntryCardProps) {
   const totalStars = Object.values(entry.ratings).reduce((sum, v) => sum + v, 0);
 
-  const dressSvg = composeDress(entry, entry.anchors, {
-    photoWidth: CARD_W,
-    photoHeight: CARD_H,
-    idPrefix: `card-${entry.id}-`,
-  });
+  const dressSvg = useMemo(
+    () => composeDress(entry, entry.anchors, { photoWidth: CARD_W, photoHeight: CARD_H, idPrefix: `card-${entry.id}-` }),
+    [entry]
+  );
 
   return (
     <button

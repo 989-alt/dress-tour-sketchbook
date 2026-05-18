@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { loadImageWithCorrectOrientation } from '../lib/exif';
 import { detectPose, landmarksToAnchors } from '../lib/pose';
@@ -19,6 +19,17 @@ export function PhotoUploadModal({ onClose }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>({ kind: 'idle' });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (step.kind === 'detecting') return;
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [onClose, step.kind]);
 
   async function handleFile(file: File) {
     setStep({ kind: 'detecting' });
