@@ -23,8 +23,15 @@ export interface BuildPromptOptions {
   /** Whether a reference dress image is being sent. If true, the prompt
    * instructs the model to use that image as the design starting point. */
   hasReferenceDress: boolean;
+  /** If true, the AI is given the PREVIOUS generation result as input. The
+   * prompt instructs the model to PRESERVE everything from that previous
+   * image and only modify what's specified (regions + extra instructions).
+   * Defaults to false. */
+  hasPreviousResult?: boolean;
   /** Free-form additional user instructions appended near the end of the prompt. */
   extraInstructions?: string;
+  /** Region-specific instructions paired with the pre-drawn mask paths. */
+  regionPrompts?: { id: string; prompt: string; pathData: string; hue: number }[];
 }
 
 // ── Lookup tables ─────────────────────────────────────────────────────────────
@@ -212,25 +219,51 @@ const ACCESSORY: Record<AccessoryType, string | null> = {
 // ── Main builder ──────────────────────────────────────────────────────────────
 
 export function buildPrompt(entry: DressEntry, options: BuildPromptOptions): string {
-  const { hasReferenceDress, extraInstructions } = options;
+  const { hasReferenceDress, hasPreviousResult = false, extraInstructions, regionPrompts } = options;
 
   const lines: string[] = [];
 
-  // ── Opening ──
-  lines.push('You are applying a wedding dress to the person in the FIRST input image.');
-  lines.push('');
-
-  if (hasReferenceDress) {
-    lines.push(
-      'Use the SECOND input image as the dress design reference. Adapt that dress\'s overall look to fit the person in the first image, while modifying it per the specification below.',
-    );
+  if (hasPreviousResult) {
+    // ── Iteration mode opening ──
+    lines.push('You are iterating on a wedding dress synthesis.');
+    lines.push('');
+    lines.push('INPUT IMAGES (in order):');
+    lines.push('1. The bride\'s photo (face masked) — face/mask/pose/background must all be preserved exactly.');
+    lines.push('2. The PREVIOUS synthesis result of the dress on this bride. Treat this as the canonical current dress.');
+    if (hasReferenceDress) {
+      lines.push('3. Dress design reference for any new design elements.');
+    }
+    lines.push('');
+    lines.push('CRITICAL ITERATION RULES:');
+    lines.push('- Use the PREVIOUS RESULT (image 2) as the source of truth for the existing dress.');
+    lines.push('- Preserve EVERY existing dress detail (silhouette, neckline, fabric, color, embellishments, veil, accessory) EXCEPT what\'s specifically changed below.');
+    lines.push('- Only modify the areas / aspects explicitly listed under MODIFICATIONS or REGION-SPECIFIC INSTRUCTIONS.');
+    lines.push('- The result should look like the previous image with only the requested changes applied — not a fresh re-synthesis.');
+    lines.push('');
+    lines.push('MODIFICATIONS (apply on top of the previous result):');
+    if (extraInstructions && extraInstructions.trim().length > 0) {
+      lines.push(extraInstructions.trim());
+    } else {
+      lines.push('(none — preserve everything as-is unless region instructions specify otherwise)');
+    }
+    lines.push('');
   } else {
-    lines.push(
-      'Synthesize a wedding dress that fits the person in the input image per the specification below.',
-    );
-  }
+    // ── Fresh synthesis opening ──
+    lines.push('You are applying a wedding dress to the person in the FIRST input image.');
+    lines.push('');
 
-  lines.push('');
+    if (hasReferenceDress) {
+      lines.push(
+        'Use the SECOND input image as the dress design reference. Adapt that dress\'s overall look to fit the person in the first image, while modifying it per the specification below.',
+      );
+    } else {
+      lines.push(
+        'Synthesize a wedding dress that fits the person in the input image per the specification below.',
+      );
+    }
+
+    lines.push('');
+  }
 
   // ── Critical constraints ──
   lines.push('CRITICAL CONSTRAINTS:');
@@ -241,7 +274,12 @@ export function buildPrompt(entry: DressEntry, options: BuildPromptOptions): str
   lines.push('');
 
   // ── Dress spec ──
-  lines.push('WEDDING DRESS SPECIFICATION:');
+  // When iterating, the spec is reference only — the previous result is the source of truth.
+  if (hasPreviousResult) {
+    lines.push('For reference, the current dress specification is:');
+  } else {
+    lines.push('WEDDING DRESS SPECIFICATION:');
+  }
 
   // Silhouette
   lines.push(`- Silhouette: ${SILHOUETTE[entry.silhouette]}`);
@@ -328,10 +366,26 @@ export function buildPrompt(entry: DressEntry, options: BuildPromptOptions): str
 
   lines.push('');
 
-  // ── Extra instructions ──
-  if (extraInstructions && extraInstructions.trim().length > 0) {
+  // ── Extra instructions (fresh mode only — iteration mode embeds them above) ──
+  if (!hasPreviousResult && extraInstructions && extraInstructions.trim().length > 0) {
     lines.push('ADDITIONAL USER NOTES:');
     lines.push(extraInstructions.trim());
+    lines.push('');
+  }
+
+  // ── Region-specific instructions ──
+  const activeRegions = regionPrompts?.filter((r) => r.prompt.trim().length > 0) ?? [];
+  if (activeRegions.length > 0) {
+    lines.push('REGION-SPECIFIC INSTRUCTIONS:');
+    if (hasPreviousResult) {
+      lines.push('These changes apply ON TOP of the previous result. Only the brushed areas are affected.');
+    } else {
+      lines.push('The user has marked specific areas on the bride photo with colored paint strokes (see metadata below). Each region has its own instruction. Apply each instruction ONLY to the area covered by its corresponding stroke pattern.');
+    }
+    lines.push('');
+    activeRegions.forEach((r, i) => {
+      lines.push(`- Region ${i + 1} (hue ${r.hue}°, path: ${r.pathData.slice(0, 80)}${r.pathData.length > 80 ? '…' : ''} — focus on the brushed area): ${r.prompt}`);
+    });
     lines.push('');
   }
 

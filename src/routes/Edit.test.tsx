@@ -303,6 +303,75 @@ describe('Edit route — AI 합성 UI', () => {
     );
   });
 
+  it('without aiResult: only "AI 합성" button shows, no iterate option', async () => {
+    renderEdit();
+    await waitFor(
+      () => expect(screen.getByLabelText('AI 합성 시작')).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    expect(screen.queryByLabelText('이어서 다듬기')).toBeNull();
+    expect(screen.queryByLabelText('처음부터 다시 합성')).toBeNull();
+  });
+
+  it('when aiResult exists, "이어서 다듬기" button appears', async () => {
+    const anchors = makeAnchors();
+    const entry = createDefaultEntry('iter-id', anchors);
+    entry.aiResult = {
+      dataUrl: 'data:image/png;base64,abc',
+      generatedAt: Date.now(),
+      modelId: 'test-model',
+      paramsHash: 'somehash',
+      prompt: 'test',
+    };
+    useAppStore.setState({ meta: FAKE_META, entries: [entry], hydrated: true });
+    render(
+      <MemoryRouter initialEntries={['/edit/iter-id']}>
+        <Routes>
+          <Route path="/edit/:id" element={<Edit />} />
+          <Route path="/" element={<div>home</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await waitFor(
+      () => expect(screen.getByLabelText('이어서 다듬기')).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    expect(screen.getByLabelText('처음부터 다시 합성')).toBeInTheDocument();
+  });
+
+  it('clicking 이어서 다듬기 calls generateDressImage with iterate: true', async () => {
+    const { generateDressImage } = await import('../lib/aiClient');
+    const mockGenerate = vi.mocked(generateDressImage);
+    mockGenerate.mockReturnValue(new Promise(() => {}));
+
+    const anchors = makeAnchors();
+    const entry = createDefaultEntry('iter-click-id', anchors);
+    entry.aiResult = {
+      dataUrl: 'data:image/png;base64,abc',
+      generatedAt: Date.now(),
+      modelId: 'test-model',
+      paramsHash: 'somehash',
+      prompt: 'test',
+    };
+    useAppStore.setState({ meta: FAKE_META, entries: [entry], hydrated: true });
+    render(
+      <MemoryRouter initialEntries={['/edit/iter-click-id']}>
+        <Routes>
+          <Route path="/edit/:id" element={<Edit />} />
+          <Route path="/" element={<div>home</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await waitFor(
+      () => expect(screen.getByLabelText('이어서 다듬기')).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    fireEvent.click(screen.getByLabelText('이어서 다듬기'));
+    await waitFor(() => expect(mockGenerate).toHaveBeenCalled(), { timeout: 3000 });
+    const callOpts = mockGenerate.mock.calls[mockGenerate.mock.calls.length - 1][0];
+    expect(callOpts.iterate).toBe(true);
+  });
+
   it('reference dress upload sets entry referenceDress', async () => {
     renderEdit();
     await waitFor(

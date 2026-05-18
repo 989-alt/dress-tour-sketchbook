@@ -141,3 +141,94 @@ describe('buildPrompt', () => {
     expect(prompt).toContain('tiara');
   });
 });
+
+describe('buildPrompt — hasPreviousResult', () => {
+  it('hasPreviousResult true: prompt contains "PREVIOUS synthesis result" and "Preserve EVERY existing"', () => {
+    const prompt = buildPrompt(makeEntry(), { hasReferenceDress: false, hasPreviousResult: true });
+    expect(prompt).toContain('PREVIOUS synthesis result');
+    expect(prompt).toContain('Preserve EVERY existing');
+  });
+
+  it('hasPreviousResult true: spec section is softened (no "WEDDING DRESS SPECIFICATION" header)', () => {
+    const prompt = buildPrompt(makeEntry(), { hasReferenceDress: false, hasPreviousResult: true });
+    expect(prompt).not.toContain('WEDDING DRESS SPECIFICATION');
+    expect(prompt).toContain('For reference, the current dress specification is');
+  });
+
+  it('hasPreviousResult false: original "WEDDING DRESS SPECIFICATION" wording present', () => {
+    const prompt = buildPrompt(makeEntry(), { hasReferenceDress: false, hasPreviousResult: false });
+    expect(prompt).toContain('WEDDING DRESS SPECIFICATION');
+    expect(prompt).not.toContain('For reference, the current dress specification is');
+  });
+
+  it('hasPreviousResult true with extraInstructions: instructions appear under MODIFICATIONS', () => {
+    const prompt = buildPrompt(makeEntry(), {
+      hasReferenceDress: false,
+      hasPreviousResult: true,
+      extraInstructions: '소매를 짧게 해주세요',
+    });
+    expect(prompt).toContain('MODIFICATIONS');
+    expect(prompt).toContain('소매를 짧게 해주세요');
+  });
+
+  it('hasReferenceDress + hasPreviousResult both true: prompt mentions all 3 input images', () => {
+    const prompt = buildPrompt(makeEntry(), { hasReferenceDress: true, hasPreviousResult: true });
+    expect(prompt).toContain('1. The bride');
+    expect(prompt).toContain('2. The PREVIOUS synthesis result');
+    expect(prompt).toContain('3. Dress design reference');
+  });
+});
+
+describe('buildPrompt — regionPrompts', () => {
+  it('regionPrompts present: prompt mentions "REGION-SPECIFIC INSTRUCTIONS"', () => {
+    const prompt = buildPrompt(makeEntry(), {
+      hasReferenceDress: false,
+      hasPreviousResult: false,
+      regionPrompts: [{ id: 'r1', prompt: '여기에 레이스 추가', pathData: 'M 10 20 L 30 40', hue: 120 }],
+    });
+    expect(prompt).toContain('REGION-SPECIFIC INSTRUCTIONS');
+  });
+
+  it('regionPrompts with 2 regions: both listed numbered', () => {
+    const prompt = buildPrompt(makeEntry(), {
+      hasReferenceDress: false,
+      hasPreviousResult: false,
+      regionPrompts: [
+        { id: 'r1', prompt: '레이스 추가', pathData: 'M 10 20 L 30 40', hue: 120 },
+        { id: 'r2', prompt: '비즈 더 많이', pathData: 'M 50 60 L 70 80', hue: 200 },
+      ],
+    });
+    expect(prompt).toContain('Region 1');
+    expect(prompt).toContain('Region 2');
+    expect(prompt).toContain('레이스 추가');
+    expect(prompt).toContain('비즈 더 많이');
+  });
+
+  it('regionPrompts empty array: no region section in prompt', () => {
+    const prompt = buildPrompt(makeEntry(), {
+      hasReferenceDress: false,
+      hasPreviousResult: false,
+      regionPrompts: [],
+    });
+    expect(prompt).not.toContain('REGION-SPECIFIC INSTRUCTIONS');
+  });
+
+  it('regionPrompts with blank prompt entries are filtered out', () => {
+    const prompt = buildPrompt(makeEntry(), {
+      hasReferenceDress: false,
+      hasPreviousResult: false,
+      regionPrompts: [{ id: 'r1', prompt: '   ', pathData: 'M 10 20 L 30 40', hue: 0 }],
+    });
+    expect(prompt).not.toContain('REGION-SPECIFIC INSTRUCTIONS');
+  });
+
+  it('regionPrompts + hasPreviousResult: states changes apply on top of previous result', () => {
+    const prompt = buildPrompt(makeEntry(), {
+      hasReferenceDress: false,
+      hasPreviousResult: true,
+      regionPrompts: [{ id: 'r1', prompt: '레이스 추가', pathData: 'M 10 20', hue: 60 }],
+    });
+    expect(prompt).toContain('REGION-SPECIFIC INSTRUCTIONS');
+    expect(prompt).toContain('apply ON TOP of the previous result');
+  });
+});

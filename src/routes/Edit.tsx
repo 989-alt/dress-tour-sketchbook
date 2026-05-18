@@ -209,7 +209,7 @@ export default function Edit() {
     [debouncedSave],
   );
 
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = useCallback(async (iterate: boolean) => {
     if (!meta?.basePhoto || !currentEntry) return;
     setGenerating(true);
     setGenerateError(null);
@@ -220,6 +220,7 @@ export default function Edit() {
         photoBlob: meta.basePhoto,
         entry: currentEntry,
         extraInstructions: extraPrompt || undefined,
+        iterate,
         signal: ctrl.signal,
       });
       handleEntryChange({ aiResult: result });
@@ -422,8 +423,7 @@ export default function Edit() {
     currentEntry.aiResult.paramsHash !== paramsHash(currentEntry);
 
   const canGenerate = !!meta?.basePhoto && !generating;
-
-  const generateLabel = generating ? '생성 중...' : currentEntry.aiResult ? '다시 합성' : '✨ AI 합성';
+  const hasAiResult = !!currentEntry.aiResult;
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -441,14 +441,43 @@ export default function Edit() {
         {isStale && (
           <span className="text-xs text-amber-500" aria-label="변경됨 표시">⚠️ 변경됨</span>
         )}
-        <button
-          onClick={generating ? handleCancelGenerate : handleGenerate}
-          disabled={!generating && !canGenerate}
-          aria-label={generating ? 'AI 합성 취소' : 'AI 합성 시작'}
-          className="text-xs px-2 py-1 rounded bg-purple-600 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-purple-700"
-        >
-          {generateLabel}{generating && ' (취소)'}
-        </button>
+        {generating ? (
+          <button
+            onClick={handleCancelGenerate}
+            aria-label="AI 합성 취소"
+            className="text-xs px-2 py-1 rounded bg-purple-600 text-white hover:bg-purple-700"
+          >
+            생성 중... (취소)
+          </button>
+        ) : hasAiResult ? (
+          <>
+            <button
+              onClick={() => void handleGenerate(true)}
+              disabled={!canGenerate}
+              aria-label="이어서 다듬기"
+              className="text-xs px-2 py-1 rounded bg-purple-600 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-purple-700"
+            >
+              🔄 이어서 다듬기
+            </button>
+            <button
+              onClick={() => void handleGenerate(false)}
+              disabled={!canGenerate}
+              aria-label="처음부터 다시 합성"
+              className="text-xs px-2 py-1 rounded bg-gray-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600"
+            >
+              ↻ 처음부터 다시
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => void handleGenerate(false)}
+            disabled={!canGenerate}
+            aria-label="AI 합성 시작"
+            className="text-xs px-2 py-1 rounded bg-purple-600 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-purple-700"
+          >
+            ✨ AI 합성
+          </button>
+        )}
         {currentEntry.aiResult && (
           <button
             onClick={() => void handleDownloadPng()}
@@ -490,6 +519,9 @@ export default function Edit() {
           <div className="shrink-0 border-b border-gray-200 px-3 py-2 bg-gray-50" aria-label="ai-section">
             {generateError && (
               <p className="text-xs text-red-600 mb-1" role="alert">{generateError}</p>
+            )}
+            {hasAiResult && (
+              <p className="text-[10px] text-gray-400 mb-1">기존 결과의 디테일을 유지하며 변경 사항만 반영합니다.</p>
             )}
             <div className="flex gap-2 items-start">
               {/* Reference dress upload */}

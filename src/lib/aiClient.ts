@@ -6,6 +6,9 @@ export interface GenerateOptions {
   photoBlob: Blob;
   entry: DressEntry;
   extraInstructions?: string;
+  /** When true, send the previous aiResult.dataUrl as an additional input
+   * and tell the prompt to preserve everything except specified changes. */
+  iterate?: boolean;
   signal?: AbortSignal;
 }
 
@@ -55,7 +58,7 @@ function parseDataUrl(dataUrl: string): { base64: string; mimeType: string } {
 }
 
 export async function generateDressImage(opts: GenerateOptions): Promise<AIResult> {
-  const { photoBlob, entry, extraInstructions, signal } = opts;
+  const { photoBlob, entry, extraInstructions, iterate, signal } = opts;
 
   if (signal?.aborted) {
     throw new AIGenerationError('ABORTED', koreanMessage('ABORTED'));
@@ -71,9 +74,24 @@ export async function generateDressImage(opts: GenerateOptions): Promise<AIResul
     referenceDressMimeType = parsed.mimeType;
   }
 
+  const hasPreviousResult = !!iterate && !!entry.aiResult?.dataUrl;
+  let previousResultBase64: string | undefined;
+  let previousResultMimeType: string | undefined;
+  if (hasPreviousResult && entry.aiResult) {
+    const parsed = parseDataUrl(entry.aiResult.dataUrl);
+    previousResultBase64 = parsed.base64;
+    previousResultMimeType = parsed.mimeType;
+  }
+
+  const regionPrompts = (entry.regionPrompts ?? [])
+    .filter((r) => r.prompt.trim().length > 0)
+    .map((r) => ({ id: r.id, prompt: r.prompt, pathData: r.pathData, hue: r.hue }));
+
   const prompt = buildPrompt(entry, {
     hasReferenceDress: !!entry.referenceDress,
+    hasPreviousResult,
     extraInstructions,
+    regionPrompts: regionPrompts.length > 0 ? regionPrompts : undefined,
   });
 
   const body: Record<string, string> = {
@@ -81,6 +99,10 @@ export async function generateDressImage(opts: GenerateOptions): Promise<AIResul
     photoMimeType,
     prompt,
   };
+  if (previousResultBase64 && previousResultMimeType) {
+    body.previousResultBase64 = previousResultBase64;
+    body.previousResultMimeType = previousResultMimeType;
+  }
   if (referenceDressBase64 && referenceDressMimeType) {
     body.referenceDressBase64 = referenceDressBase64;
     body.referenceDressMimeType = referenceDressMimeType;

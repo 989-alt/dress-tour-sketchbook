@@ -5,6 +5,9 @@ interface GenerateRequest {
   photoMimeType: string;          // 'image/jpeg' | 'image/png' | 'image/webp'
   referenceDressBase64?: string;  // optional reference dress photo
   referenceDressMimeType?: string;
+  /** Previous generation result, sent for iteration consistency. */
+  previousResultBase64?: string;
+  previousResultMimeType?: string;
   prompt: string;                 // full text from frontend's buildPrompt
 }
 
@@ -36,17 +39,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'MISSING_FIELDS' });
   }
 
-  // Combined size guard ~ 12 MB base64
+  // Combined size guard ~ 16 MB base64
   const total =
-    body.photoBase64.length + (body.referenceDressBase64?.length ?? 0);
-  if (total > 12 * 1024 * 1024) {
+    body.photoBase64.length +
+    (body.previousResultBase64?.length ?? 0) +
+    (body.referenceDressBase64?.length ?? 0);
+  if (total > 16 * 1024 * 1024) {
     return res.status(413).json({ error: 'IMAGE_TOO_LARGE' });
   }
 
+  // Image order must match the order described in the prompt:
+  // text prompt → bride photo → previous result (if any) → reference dress (if any)
   const parts: Array<Record<string, unknown>> = [{ text: body.prompt }];
   parts.push({
     inline_data: { mime_type: body.photoMimeType, data: body.photoBase64 },
   });
+  if (body.previousResultBase64 && body.previousResultMimeType) {
+    parts.push({
+      inline_data: {
+        mime_type: body.previousResultMimeType,
+        data: body.previousResultBase64,
+      },
+    });
+  }
   if (body.referenceDressBase64 && body.referenceDressMimeType) {
     parts.push({
       inline_data: {
