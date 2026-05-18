@@ -8,6 +8,7 @@ import { BACKS } from '../parts/backs';
 import { FABRICS } from '../parts/fabrics';
 import { TEXTURES, slitCutout, trainPath } from '../parts/skirts';
 import { EMBELLISHMENTS } from '../parts/embellishments';
+import { VEIL_LENGTHS } from '../parts/veils';
 import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -378,6 +379,54 @@ function renderEmbellishments(
 }
 
 // ---------------------------------------------------------------------------
+// Veil rendering
+// ---------------------------------------------------------------------------
+
+// Canonical reference anchors for head/shoulder area
+const REF_HEAD_TOP = { x: 200, y: 20 };
+const REF_CHIN     = { x: 200, y: 70 };
+
+/**
+ * Render veil back and front fragments.
+ * Uses a 3-point affine from canonical (headTop, shoulderL, shoulderR) → actual.
+ * Returns { back, front } where back goes behind the bride and front goes on top.
+ */
+function renderVeil(
+  entry: DressEntry,
+  anchors: AnchorSet,
+  idPrefix: string,
+): { back: ReactElement | null; front: ReactElement | null } {
+  if (!entry.veil) return { back: null, front: null };
+
+  const { length, edge, layers } = entry.veil;
+  const def = VEIL_LENGTHS[length];
+  const colorHex = COLOR_HEX[entry.color.primary];
+
+  // Affine from canonical head/shoulder space → actual anchor space
+  const xform = solveAffine(
+    [REF_HEAD_TOP, REF_SHOULDER_L, REF_SHOULDER_R],
+    [anchors.headTop, anchors.shoulderL, anchors.shoulderR],
+  );
+
+  // Build canonical veil elements
+  const { back: backEl, front: frontEl } = def.render({
+    edge,
+    layers,
+    color: colorHex,
+    headTopY: REF_HEAD_TOP.y,
+    chinY: REF_CHIN.y,
+    shoulderLX: REF_SHOULDER_L.x,
+    shoulderRX: REF_SHOULDER_R.x,
+    idPrefix,
+  });
+
+  const transformStr = toSvgTransform(xform);
+  const back  = backEl  ? <g transform={transformStr}>{backEl}</g>  : null;
+  const front = frontEl ? <g transform={transformStr}>{frontEl}</g> : null;
+  return { back, front };
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -395,6 +444,9 @@ export function composeDress(
 ): ReactElement {
   const { photoWidth, photoHeight, idPrefix = '' } = options;
 
+  // T19: veil fragments — back goes behind everything, front goes on top
+  const { back: veilBack, front: veilFront } = renderVeil(entry, anchors, idPrefix);
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -406,6 +458,8 @@ export function composeDress(
       <defs>
         {renderFabricDefs(entry, idPrefix)}
       </defs>
+      {/* T19: veil back layer — very back, before train */}
+      {veilBack}
       {/* T17: train behind silhouette */}
       {renderTrain(entry, anchors)}
       {renderSilhouette(entry, anchors, idPrefix)}
@@ -420,6 +474,8 @@ export function composeDress(
       {renderBackHint(entry, anchors, idPrefix)}
       {/* T18: embellishments layer */}
       {renderEmbellishments(entry, anchors, idPrefix)}
+      {/* T19: veil front layer — top of everything (blusher / front drape) */}
+      {veilFront}
     </svg>
   );
 }

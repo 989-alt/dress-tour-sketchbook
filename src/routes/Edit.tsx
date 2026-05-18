@@ -20,9 +20,10 @@ import { FabricPanel } from '../components/panels/FabricPanel';
 import { ColorPanel } from '../components/panels/ColorPanel';
 import { SkirtPanel } from '../components/panels/SkirtPanel';
 import { EmbellishmentsPanel } from '../components/panels/EmbellishmentsPanel';
+import { VeilPanel } from '../components/panels/VeilPanel';
 import type { SketchOverlayHandle } from '../components/SketchOverlay';
 
-type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'back' | 'fabric' | 'color' | 'skirt' | 'embellishments' | 'anchor' | 'pen' | 'meta';
+type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'back' | 'fabric' | 'color' | 'skirt' | 'embellishments' | 'veil' | 'anchor' | 'pen' | 'meta';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'basic', label: '기본' },
@@ -35,6 +36,7 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'color', label: '컬러' },
   { id: 'skirt', label: '스커트' },
   { id: 'embellishments', label: '장식' },
+  { id: 'veil', label: '베일' },
   { id: 'anchor', label: '앵커' },
   { id: 'pen', label: '펜' },
   { id: 'meta', label: '메모' },
@@ -233,6 +235,13 @@ export default function Edit() {
             value={currentEntry.embellishments}
             accentColor={currentEntry.color.accent}
             onChange={(e) => handleEntryChange({ embellishments: e })}
+          />
+        );
+      case 'veil':
+        return (
+          <VeilPanel
+            value={currentEntry.veil}
+            onChange={(v) => handleEntryChange({ veil: v })}
           />
         );
       case 'anchor':

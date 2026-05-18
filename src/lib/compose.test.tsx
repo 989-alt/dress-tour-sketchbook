@@ -918,3 +918,92 @@ describe('composeDress — train (T17)', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Test T19: Veil rendering (back/front Z-order)
+// ---------------------------------------------------------------------------
+describe('composeDress — veil (T19)', () => {
+  it('veil=null: no veil layer rendered', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t19-null', anchors);
+    entry.veil = null;
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-veil-layer=');
+  });
+
+  it('fingertip + layers=1: renders back layer, no front layer', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t19-fingertip-1', anchors);
+    entry.veil = { length: 'fingertip', edge: 'cut', layers: 1 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-veil-layer="back"');
+    expect(html).not.toContain('data-veil-layer="front"');
+  });
+
+  it('fingertip + layers=2: renders both back and front layers', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t19-fingertip-2', anchors);
+    entry.veil = { length: 'fingertip', edge: 'lace', layers: 2 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-veil-layer="back"');
+    expect(html).toContain('data-veil-layer="front"');
+  });
+
+  it('blusher renders only front layer', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t19-blusher', anchors);
+    entry.veil = { length: 'blusher', edge: 'ribbon', layers: 1 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-veil-layer="back"');
+    expect(html).toContain('data-veil-layer="front"');
+  });
+
+  it('back veil layer appears before clipPath in output (Z-order: back before bride)', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t19-zorder', anchors);
+    entry.veil = { length: 'chapel', edge: 'cut', layers: 1 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    const backIdx = html.indexOf('data-veil-layer="back"');
+    const clipIdx = html.indexOf('<clipPath ');
+    expect(backIdx).toBeGreaterThanOrEqual(0);
+    expect(clipIdx).toBeGreaterThanOrEqual(0);
+    expect(backIdx).toBeLessThan(clipIdx);
+  });
+
+  it('front veil layer appears after embellishments in output (Z-order: front on top)', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t19-zorder-front', anchors);
+    entry.veil = { length: 'waltz', edge: 'cut', layers: 2 };
+    entry.embellishments = [{ type: 'pearls', region: 'bodice', intensity: 2 }];
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    const embIdx = html.indexOf('data-embellishment="pearls"');
+    const frontIdx = html.lastIndexOf('data-veil-layer="front"');
+    expect(embIdx).toBeGreaterThanOrEqual(0);
+    expect(frontIdx).toBeGreaterThanOrEqual(0);
+    expect(frontIdx).toBeGreaterThan(embIdx);
+  });
+
+  it('all 7 veil lengths render without throwing', () => {
+    const lengths = ['none', 'blusher', 'elbow', 'fingertip', 'waltz', 'chapel', 'cathedral'] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const length of lengths) {
+      const entry = createDefaultEntry(`t19-len-${length}`, anchors);
+      entry.veil = length === 'none' ? null : { length, edge: 'cut', layers: 1 };
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+
+  it('all 4 edge types render without throwing', () => {
+    const edges = ['cut', 'ribbon', 'beaded', 'lace'] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const edge of edges) {
+      const entry = createDefaultEntry(`t19-edge-${edge}`, anchors);
+      entry.veil = { length: 'chapel', edge, layers: 1 };
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});
