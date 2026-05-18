@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
-    "generate-previews": "tsx scripts/generate-previews.ts"
+    "generate-previews": "tsx scripts/generate-previews.ts",
+    "compress-previews": "tsx scripts/compress-previews.ts"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.21",

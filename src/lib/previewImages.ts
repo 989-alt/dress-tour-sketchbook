@@ -8,5 +8,5 @@ export type PreviewCategory =
 export function previewUrl(category: PreviewCategory, value: string): string {
   const base = import.meta.env.BASE_URL;
   const normalizedBase = base.endsWith('/') ? base : `${base}/`;
-  return `${normalizedBase}previews/${category}/${value}.png`;
+  return `${normalizedBase}previews/${category}/${value}.webp`;
 }
