@@ -4,7 +4,7 @@ import { composeDress } from './compose';
 import { COLOR_HEX } from './colorPalette';
 import { createDefaultEntry } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
-import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial } from '../types';
+import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial, BackType } from '../types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -471,6 +471,47 @@ describe('composeDress — waist position offset (T13)', () => {
       const entry = createDefaultEntry(`t13-wp-${waistPosition}`, anchors);
       entry.bodice.waistPosition = waistPosition;
       entry.bodice.accent = 'sash';
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 14 (T14): Back hint rendering
+// ---------------------------------------------------------------------------
+describe('composeDress — back hint (T14)', () => {
+  it('closed back: does not render data-back markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t14-closed', anchors);
+    entry.back = { type: 'closed', openDepth: 0 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-back=');
+  });
+
+  it('openBack with openDepth=3: renders data-back=openBack markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t14-openback', anchors);
+    entry.back = { type: 'openBack', openDepth: 3 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-back="openBack"');
+  });
+
+  it('vBack: renders data-back=vBack markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t14-vback', anchors);
+    entry.back = { type: 'vBack', openDepth: 0 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-back="vBack"');
+  });
+
+  it('all 8 back types render without throwing', () => {
+    const backTypes: BackType[] = ['closed', 'vBack', 'illusionBack', 'openBack', 'keyhole', 'buttonRow', 'laceUpCorset', 'drape'];
+    const anchors = anchorSetFromRef('aline');
+    for (const type of backTypes) {
+      const entry = createDefaultEntry(`t14-all-${type}`, anchors);
+      entry.back = { type, openDepth: 2 };
       expect(() =>
         renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
       ).not.toThrow();

@@ -4,6 +4,7 @@ import { SILHOUETTES } from '../parts/silhouettes';
 import { NECKLINES } from '../parts/necklines';
 import { SLEEVES } from '../parts/sleeves';
 import { STRUCTURES, ACCENTS, WAIST_Y_OFFSET } from '../parts/bodices';
+import { BACKS } from '../parts/backs';
 import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -134,6 +135,24 @@ function renderBodice(
   return <g transform={toSvgTransform(xform)}>{element}</g>;
 }
 
+/** Render back hint at side edges (minimal visual cue). */
+function renderBackHint(
+  entry: DressEntry,
+  anchors: AnchorSet,
+  idPrefix: string,
+): ReactElement | null {
+  const def = BACKS[entry.back.type];
+  const waistY = REF_WAIST.y + WAIST_Y_OFFSET[entry.bodice.waistPosition];
+  const element = def.render({ topY: 120, waistY, openDepth: entry.back.openDepth, idPrefix });
+  if (!element) return null;
+
+  const xform = solveAffine(
+    [REF_SHOULDER_L, REF_SHOULDER_R, REF_BUST],
+    [anchors.shoulderL, anchors.shoulderR, anchors.bust],
+  );
+  return <g transform={toSvgTransform(xform)}>{element}</g>;
+}
+
 /** Render waist accent (sash, ribbon, brooch, beadedBand). */
 function renderAccent(
   entry: DressEntry,
@@ -199,6 +218,8 @@ export function composeDress(
       {/* T13: bodice structure + accent layers */}
       {renderBodice(entry, anchors)}
       {renderAccent(entry, anchors)}
+      {/* T14: back hint layer */}
+      {renderBackHint(entry, anchors, idPrefix)}
       {/* T17+ skirt layer goes here */}
       {/* T18+ embellishments go here */}
     </svg>

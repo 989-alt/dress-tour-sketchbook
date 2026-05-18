@@ -15,9 +15,10 @@ import { MetadataPanel } from '../components/panels/MetadataPanel';
 import { NecklinePanel } from '../components/panels/NecklinePanel';
 import { SleevePanel } from '../components/panels/SleevePanel';
 import { BodicePanel } from '../components/panels/BodicePanel';
+import { BackPanel } from '../components/panels/BackPanel';
 import type { SketchOverlayHandle } from '../components/SketchOverlay';
 
-type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'anchor' | 'pen' | 'meta';
+type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'back' | 'anchor' | 'pen' | 'meta';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'basic', label: '기본' },
@@ -25,6 +26,7 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'neckline', label: '넥라인' },
   { id: 'sleeve', label: '소매' },
   { id: 'bodice', label: '보디스' },
+  { id: 'back', label: '등판' },
   { id: 'anchor', label: '앵커' },
   { id: 'pen', label: '펜' },
   { id: 'meta', label: '메모' },
@@ -187,6 +189,13 @@ export default function Edit() {
           <BodicePanel
             value={currentEntry.bodice}
             onChange={(b) => handleEntryChange({ bodice: b })}
+          />
+        );
+      case 'back':
+        return (
+          <BackPanel
+            value={currentEntry.back}
+            onChange={(b) => handleEntryChange({ back: b })}
           />
         );
       case 'anchor':
