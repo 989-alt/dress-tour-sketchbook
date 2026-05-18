@@ -79,39 +79,32 @@ describe('Home route', () => {
   it('renders upload button when no photo', () => {
     useAppStore.setState({ meta: null, entries: [], hydrated: true });
     renderHome();
-    expect(screen.getByText('베이스 사진 업로드 + 포즈 검출')).toBeInTheDocument();
+    expect(screen.getByText('사진 업로드 + 포즈 검출')).toBeInTheDocument();
   });
 
-  it('does not render "사진 변경" when no photo', () => {
+  it('does not render "변경" button when no photo', () => {
     useAppStore.setState({ meta: null, entries: [], hydrated: true });
     renderHome();
-    expect(screen.queryByText('사진 변경')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '변경' })).not.toBeInTheDocument();
   });
 
-  it('renders "사진 변경" when photo exists', () => {
+  it('renders "변경" button when photo exists', () => {
     useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
     renderHome();
-    expect(screen.getByText('사진 변경')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '변경' })).toBeInTheDocument();
   });
 
-  it('renders "+ 새 드레스 추가" button', () => {
+  it('shows placeholder hint instead of CTA when no photo', () => {
     useAppStore.setState({ meta: null, entries: [], hydrated: true });
+    renderHome();
+    expect(screen.getByText('먼저 베이스 사진을 등록해 주세요')).toBeInTheDocument();
+    expect(screen.queryByText('+ 새 드레스 추가')).not.toBeInTheDocument();
+  });
+
+  it('renders "+ 새 드레스 추가" button when photo exists', () => {
+    useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
     renderHome();
     expect(screen.getByText('+ 새 드레스 추가')).toBeInTheDocument();
-  });
-
-  it('"+ 새 드레스 추가" is disabled when no photo', () => {
-    useAppStore.setState({ meta: null, entries: [], hydrated: true });
-    renderHome();
-    const btn = screen.getByText('+ 새 드레스 추가');
-    expect(btn).toBeDisabled();
-  });
-
-  it('"+ 새 드레스 추가" is enabled when photo exists', () => {
-    useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
-    renderHome();
-    const btn = screen.getByText('+ 새 드레스 추가');
-    expect(btn).not.toBeDisabled();
   });
 
   it('renders EntryCards when entries exist', () => {
