@@ -1,0 +1,253 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAppStore } from '../store/appStore';
+import { createDefaultEntry, type AnchorSet, type DressEntry } from '../types';
+import { loadImageWithCorrectOrientation } from '../lib/exif';
+import { debounce } from '../lib/debounce';
+import { DressCanvas } from '../components/DressCanvas';
+import { ParameterPanel } from '../components/ParameterPanel';
+import { BasicPanel } from '../components/panels/BasicPanel';
+import { SilhouettePanel } from '../components/panels/SilhouettePanel';
+import { AnchorPanel } from '../components/panels/AnchorPanel';
+import { PenPanel } from '../components/panels/PenPanel';
+import { MetadataPanel } from '../components/panels/MetadataPanel';
+import type { SketchOverlayHandle } from '../components/SketchOverlay';
+
+type TabId = 'basic' | 'silhouette' | 'anchor' | 'pen' | 'meta';
+
+const TABS: Array<{ id: TabId; label: string }> = [
+  { id: 'basic', label: '기본' },
+  { id: 'silhouette', label: '실루엣' },
+  { id: 'anchor', label: '앵커' },
+  { id: 'pen', label: '펜' },
+  { id: 'meta', label: '메모' },
+];
+
+function defaultAnchors(w: number, h: number): AnchorSet {
+  // Rough proportional defaults when no pose detection is available
+  const cx = w / 2;
+  return {
+    headTop:    { x: cx,          y: h * 0.02 },
+    chin:       { x: cx,          y: h * 0.10 },
+    neckCenter: { x: cx,          y: h * 0.13 },
+    shoulderL:  { x: cx - w * 0.10, y: h * 0.17 },
+    shoulderR:  { x: cx + w * 0.10, y: h * 0.17 },
+    bust:       { x: cx,          y: h * 0.27 },
+    waist:      { x: cx,          y: h * 0.42 },
+    hipL:       { x: cx - w * 0.08, y: h * 0.52 },
+    hipR:       { x: cx + w * 0.08, y: h * 0.52 },
+    kneeL:      { x: cx - w * 0.06, y: h * 0.70 },
+    kneeR:      { x: cx + w * 0.06, y: h * 0.70 },
+    hemL:       { x: cx - w * 0.10, y: h * 0.90 },
+    hemR:       { x: cx + w * 0.10, y: h * 0.90 },
+    hemCenter:  { x: cx,          y: h * 0.92 },
+  };
+}
+
+export default function Edit() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { meta, entries, upsertEntry, hydrated, hydrate } = useAppStore();
+
+  const [photoDims, setPhotoDims] = useState<{ w: number; h: number } | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>('basic');
+  const [manualMode, setManualMode] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Pen state
+  const [brushSize, setBrushSize] = useState<'thin' | 'medium' | 'thick'>('medium');
+  const [penColor, setPenColor] = useState<'black' | 'navy' | 'red'>('black');
+  const [eraser, setEraser] = useState(false);
+  const [acceptFinger, setAcceptFinger] = useState(false);
+  const sketchRef = useRef<SketchOverlayHandle>(null);
+
+  // Working copies
+  const [currentEntry, setCurrentEntry] = useState<DressEntry | null>(null);
+  const [currentAnchors, setCurrentAnchors] = useState<AnchorSet | null>(null);
+
+  // Hydrate store on mount
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  // Resolve entry once store is ready
+  useEffect(() => {
+    if (!hydrated) return;
+    if (id === 'new') {
+      const dims = photoDims ?? { w: 800, h: 1200 };
+      const anchors = defaultAnchors(dims.w, dims.h);
+      const newEntry = createDefaultEntry(crypto.randomUUID(), anchors);
+      setCurrentEntry(newEntry);
+      setCurrentAnchors(anchors);
+    } else if (id) {
+      const found = entries.find((e) => e.id === id);
+      if (found) {
+        setCurrentEntry(found);
+        setCurrentAnchors(found.anchors);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, id]);
+
+  // Load photo dimensions
+  useEffect(() => {
+    if (!meta?.basePhoto) return;
+    let cancelled = false;
+    loadImageWithCorrectOrientation(meta.basePhoto).then(({ width, height }) => {
+      if (!cancelled) setPhotoDims({ w: width, h: height });
+    }).catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [meta?.basePhoto]);
+
+  // Redirect if no photo
+  useEffect(() => {
+    if (hydrated && !meta?.basePhoto) {
+      navigate('/');
+    }
+  }, [hydrated, meta, navigate]);
+
+  // Debounced autosave
+  const debouncedSave = useMemo(
+    () =>
+      debounce((entry: DressEntry) => {
+        upsertEntry(entry).finally(() => setSaving(false));
+      }, 300),
+    [upsertEntry],
+  );
+
+  const handleEntryChange = useCallback(
+    (patch: Partial<DressEntry>) => {
+      setCurrentEntry((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, ...patch };
+        setSaving(true);
+        debouncedSave(next);
+        return next;
+      });
+    },
+    [debouncedSave],
+  );
+
+  const handleAnchorChange = useCallback(
+    (next: AnchorSet) => {
+      setCurrentAnchors(next);
+      handleEntryChange({ anchors: next });
+    },
+    [handleEntryChange],
+  );
+
+  const handleAnchorReset = useCallback(() => {
+    if (!currentEntry) return;
+    setCurrentAnchors(currentEntry.anchors);
+  }, [currentEntry]);
+
+  if (!hydrated || !currentEntry || !currentAnchors || !meta?.basePhoto) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-500 text-sm">
+        불러오는 중…
+      </div>
+    );
+  }
+
+  const dims = photoDims ?? { w: 800, h: 1200 };
+
+  function renderPanel() {
+    if (!currentEntry || !currentAnchors) return null;
+    switch (activeTab) {
+      case 'basic':
+        return (
+          <BasicPanel
+            entry={currentEntry}
+            onChange={(patch) => handleEntryChange(patch)}
+          />
+        );
+      case 'silhouette':
+        return (
+          <SilhouettePanel
+            value={currentEntry.silhouette}
+            onChange={(s) => handleEntryChange({ silhouette: s })}
+          />
+        );
+      case 'anchor':
+        return (
+          <AnchorPanel
+            manualMode={manualMode}
+            onManualModeChange={setManualMode}
+            onReset={handleAnchorReset}
+          />
+        );
+      case 'pen':
+        return (
+          <PenPanel
+            brushSize={brushSize}
+            color={penColor}
+            eraser={eraser}
+            acceptFinger={acceptFinger}
+            onBrushSizeChange={setBrushSize}
+            onColorChange={setPenColor}
+            onEraserChange={setEraser}
+            onAcceptFingerChange={setAcceptFinger}
+            onUndo={() => sketchRef.current?.undo()}
+            onClear={() => sketchRef.current?.clear()}
+          />
+        );
+      case 'meta':
+        return (
+          <MetadataPanel
+            entry={currentEntry}
+            onChange={(patch) => handleEntryChange(patch)}
+          />
+        );
+    }
+  }
+
+  const title = currentEntry.nickname || '새 드레스';
+
+  return (
+    <div className="flex flex-col h-screen bg-white">
+      {/* Top bar */}
+      <header className="flex items-center gap-3 px-4 py-2 border-b border-gray-200 shrink-0">
+        <button
+          onClick={() => navigate('/')}
+          className="text-gray-500 hover:text-gray-800 text-xl leading-none"
+          aria-label="뒤로"
+        >
+          ←
+        </button>
+        <h1 className="flex-1 text-sm font-semibold text-gray-800 truncate">{title}</h1>
+        <span className="text-xs text-gray-400">{saving ? '저장 중...' : '저장됨'}</span>
+      </header>
+
+      {/* Main area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left: canvas ~60% */}
+        <div className="w-3/5 flex items-start justify-center overflow-auto bg-gray-100 p-2">
+          <DressCanvas
+            photo={meta.basePhoto}
+            photoWidth={dims.w}
+            photoHeight={dims.h}
+            entry={currentEntry}
+            anchors={currentAnchors}
+            showAnchors={activeTab === 'anchor'}
+            showSketch={activeTab === 'pen'}
+            manualMode={manualMode}
+            onAnchorChange={handleAnchorChange}
+            onSketchChange={(png) => handleEntryChange({ sketchPng: png })}
+            className="max-w-full"
+          />
+        </div>
+
+        {/* Right: panels ~40% */}
+        <div className="w-2/5 border-l border-gray-200 flex flex-col" aria-label="parameter-panel-area">
+          <ParameterPanel
+            tabs={TABS}
+            activeId={activeTab}
+            onActiveChange={(id) => setActiveTab(id as TabId)}
+          >
+            {renderPanel()}
+          </ParameterPanel>
+        </div>
+      </div>
+    </div>
+  );
+}
