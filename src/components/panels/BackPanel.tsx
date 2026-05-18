@@ -1,5 +1,6 @@
 import type { BackType } from '../../types';
 import { BACKS } from '../../parts/backs';
+import { BACK_GLOSSARY } from '../../lib/glossary';
 
 const BACK_ORDER: BackType[] = [
   'closed', 'vBack', 'illusionBack', 'openBack',
@@ -32,6 +33,7 @@ export function BackPanel({ value, onChange }: BackPanelProps) {
               key={bt}
               data-back-type={bt}
               onClick={() => setType(bt)}
+              title={BACK_GLOSSARY[bt]}
               className={[
                 'px-2 py-1 rounded border text-xs transition-colors',
                 bt === value.type

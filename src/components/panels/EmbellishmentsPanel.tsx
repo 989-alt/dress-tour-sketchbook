@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Embellishment, EmbellishmentType, Region, ColorEnum } from '../../types';
 import { EMBELLISHMENTS } from '../../parts/embellishments';
+import { EMBELLISHMENT_GLOSSARY } from '../../lib/glossary';
 
 const TYPE_ORDER: EmbellishmentType[] = [
   'beads', 'laceApplique', 'threeDFlorals', 'crystals', 'pearls',
@@ -206,6 +207,7 @@ export function EmbellishmentsPanel({ value, onChange }: EmbellishmentsPanelProp
                 key={t}
                 data-add-type={t}
                 onClick={() => setAddType(t)}
+                title={EMBELLISHMENT_GLOSSARY[t]}
                 className={chip(addType === t)}
               >
                 {EMBELLISHMENTS[t].label}

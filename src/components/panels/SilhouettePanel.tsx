@@ -1,5 +1,6 @@
 import type { SilhouetteType } from '../../types';
 import { SILHOUETTES } from '../../parts/silhouettes';
+import { SILHOUETTE_GLOSSARY } from '../../lib/glossary';
 
 const SILHOUETTE_LABELS: Record<SilhouetteType, string> = {
   aline: 'A-라인',
@@ -33,6 +34,7 @@ export function SilhouettePanel({ value, onChange }: SilhouettePanelProps) {
             key={type}
             onClick={() => onChange(type)}
             data-silhouette={type}
+            title={SILHOUETTE_GLOSSARY[type]}
             className={[
               'flex flex-col items-center gap-1 p-2 rounded border transition-colors',
               selected

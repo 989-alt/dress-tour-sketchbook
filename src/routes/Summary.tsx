@@ -11,7 +11,7 @@ import type { DressEntry } from '../types';
 type SortKey = 'stars' | 'createdAt' | 'nickname' | 'shop';
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: 'stars', label: '별점 합' },
+  { value: 'stars', label: '별점합' },
   { value: 'createdAt', label: '작성 시간' },
   { value: 'nickname', label: '별명' },
   { value: 'shop', label: '매장' },

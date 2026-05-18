@@ -1,6 +1,11 @@
 import type { WaistPosition, BodiceStructure, WaistAccent, ColorEnum } from '../../types';
 import { STRUCTURES, ACCENTS } from '../../parts/bodices';
 import { COLOR_HEX } from '../../lib/colorPalette';
+import {
+  WAIST_POSITION_GLOSSARY,
+  BODICE_STRUCTURE_GLOSSARY,
+  WAIST_ACCENT_GLOSSARY,
+} from '../../lib/glossary';
 
 const WAIST_POSITIONS: Array<{ value: WaistPosition; label: string }> = [
   { value: 'natural',    label: '자연' },
@@ -34,17 +39,20 @@ function ChipButton({
   dataAttr,
   dataValue,
   label,
+  title,
 }: {
   selected: boolean;
   onClick: () => void;
   dataAttr: string;
   dataValue: string;
   label: string;
+  title?: string;
 }) {
   return (
     <button
       onClick={onClick}
       {...{ [dataAttr]: dataValue }}
+      title={title}
       className={[
         'px-2 py-1 rounded border text-xs transition-colors',
         selected
@@ -76,6 +84,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
               dataAttr="data-waist-position"
               dataValue={v}
               label={label}
+              title={WAIST_POSITION_GLOSSARY[v]}
             />
           ))}
         </div>
@@ -93,6 +102,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
               dataAttr="data-structure"
               dataValue={s}
               label={STRUCTURES[s].label}
+              title={BODICE_STRUCTURE_GLOSSARY[s]}
             />
           ))}
         </div>
@@ -110,6 +120,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
               dataAttr="data-accent"
               dataValue={a}
               label={ACCENTS[a].label}
+              title={WAIST_ACCENT_GLOSSARY[a]}
             />
           ))}
         </div>

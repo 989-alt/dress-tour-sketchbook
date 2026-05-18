@@ -1,5 +1,6 @@
 import type { SkirtTexture, SlitType, TrainLength } from '../../types';
 import { TEXTURES } from '../../parts/skirts';
+import { SKIRT_TEXTURE_GLOSSARY, TRAIN_GLOSSARY } from '../../lib/glossary';
 
 const TEXTURE_ORDER: SkirtTexture[] = [
   'smooth', 'gathered', 'pleated', 'tiered',
@@ -55,6 +56,7 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
               key={t}
               data-texture={t}
               onClick={() => onChange({ ...value, texture: t })}
+              title={SKIRT_TEXTURE_GLOSSARY[t]}
               className={chip(t === value.texture)}
             >
               {TEXTURES[t].label}
@@ -121,6 +123,7 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
               key={key}
               data-train={key}
               onClick={() => onChange({ ...value, train: key })}
+              title={TRAIN_GLOSSARY[key]}
               className={chip(key === value.train)}
             >
               {label}

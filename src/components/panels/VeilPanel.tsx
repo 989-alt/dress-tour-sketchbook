@@ -1,5 +1,6 @@
 import type { VeilLength, VeilEdge } from '../../types';
 import { VEIL_LENGTHS, VEIL_LENGTH_ORDER, VEIL_EDGES, VEIL_EDGE_ORDER } from '../../parts/veils';
+import { VEIL_LENGTH_GLOSSARY, VEIL_EDGE_GLOSSARY } from '../../lib/glossary';
 
 interface VeilPanelProps {
   value: { length: VeilLength; edge: VeilEdge; layers: 1 | 2 } | null;
@@ -48,6 +49,7 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
               key={l}
               data-veil-length={l}
               onClick={() => setLength(l)}
+              title={VEIL_LENGTH_GLOSSARY[l]}
               className={chip(length === l)}
             >
               {VEIL_LENGTHS[l].label}
@@ -66,6 +68,7 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
                 key={e}
                 data-veil-edge={e}
                 onClick={() => setEdge(e)}
+                title={VEIL_EDGE_GLOSSARY[e]}
                 className={chip(edge === e)}
               >
                 {VEIL_EDGES[e].label}

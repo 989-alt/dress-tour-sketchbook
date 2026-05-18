@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
+import { useWakeLock } from '../lib/wakeLock';
 import { createDefaultEntry, type AnchorSet, type DressEntry } from '../types';
 import { loadImageWithCorrectOrientation } from '../lib/exif';
 import { debounce } from '../lib/debounce';
@@ -167,6 +168,9 @@ export default function Edit() {
     setCurrentAnchors(fresh);
     handleEntryChange({ anchors: fresh });
   }, [currentEntry, photoDims, handleEntryChange]);
+
+  // Keep screen awake while editing a dress entry
+  useWakeLock(hydrated && !!currentEntry);
 
   if (!hydrated || !currentEntry || !currentAnchors || !meta?.basePhoto) {
     return (

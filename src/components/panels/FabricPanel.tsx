@@ -1,5 +1,6 @@
 import type { FabricType } from '../../types';
 import { FABRICS } from '../../parts/fabrics';
+import { FABRIC_GLOSSARY } from '../../lib/glossary';
 
 const FABRIC_ORDER: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta'];
 
@@ -45,6 +46,7 @@ export function FabricPanel({ value, onChange }: FabricPanelProps) {
                   data-region={region}
                   data-fabric={fabric}
                   onClick={() => setFabric(region, fabric)}
+                  title={FABRIC_GLOSSARY[fabric]}
                   className={[
                     'px-2 py-1 rounded border text-xs transition-colors',
                     selected

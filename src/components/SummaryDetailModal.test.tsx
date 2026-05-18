@@ -106,7 +106,7 @@ describe('SummaryDetailModal', () => {
     useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
     const entry = makeEntry();
     render(<SummaryDetailModal entry={entry} onClose={vi.fn()} />);
-    expect(screen.getByText(/별점 합 17/)).toBeInTheDocument();
+    expect(screen.getByText(/별점 합계 17점/)).toBeInTheDocument();
   });
 
   it('renders pros and cons', () => {

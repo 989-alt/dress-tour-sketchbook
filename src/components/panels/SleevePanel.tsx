@@ -1,5 +1,6 @@
 import type { SleeveType, SleeveMaterial } from '../../types';
 import { SLEEVES } from '../../parts/sleeves';
+import { SLEEVE_GLOSSARY, SLEEVE_MATERIAL_GLOSSARY } from '../../lib/glossary';
 
 const SLEEVE_ORDER: SleeveType[] = [
   'sleeveless', 'cap', 'short', 'threeQuarter', 'long',
@@ -40,6 +41,7 @@ export function SleevePanel({ value, onChange }: SleevePanelProps) {
               key={type}
               onClick={() => setType(type)}
               data-sleeve={type}
+              title={SLEEVE_GLOSSARY[type]}
               className={[
                 'flex flex-col items-center gap-1 p-2 rounded border transition-colors',
                 selected
@@ -73,6 +75,7 @@ export function SleevePanel({ value, onChange }: SleevePanelProps) {
               key={mat}
               onClick={() => setMaterial(mat)}
               data-material={mat}
+              title={SLEEVE_MATERIAL_GLOSSARY[mat]}
               className={[
                 'px-3 py-1 rounded-full border text-xs transition-colors',
                 selected

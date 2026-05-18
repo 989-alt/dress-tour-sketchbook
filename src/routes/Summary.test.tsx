@@ -92,7 +92,7 @@ describe('Summary route', () => {
     renderSummary();
     const select = screen.getByRole('combobox') as HTMLSelectElement;
     const options = Array.from(select.options).map((o) => o.text);
-    expect(options).toContain('별점 합');
+    expect(options).toContain('별점합');
     expect(options).toContain('작성 시간');
     expect(options).toContain('별명');
     expect(options).toContain('매장');

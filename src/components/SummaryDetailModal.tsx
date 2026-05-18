@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { DressCanvas } from './DressCanvas';
 import type { DressEntry } from '../types';
+import { useWakeLock } from '../lib/wakeLock';
 
 interface Props {
   entry: DressEntry;
@@ -19,6 +20,9 @@ export function SummaryDetailModal({ entry, onClose }: Props) {
   const meta = useAppStore((s) => s.meta);
   const [photoDims, setPhotoDims] = useState({ w: 400, h: 800 });
   const backdropRef = useRef<HTMLDivElement>(null);
+
+  // Keep screen awake while viewing dress detail
+  useWakeLock(true);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -101,7 +105,7 @@ export function SummaryDetailModal({ entry, onClose }: Props) {
 
         {/* Ratings */}
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">별점 합 {totalStars}</p>
+          <p className="text-xs font-semibold text-gray-500 mb-2">별점 합계 {totalStars}점</p>
           <div className="grid grid-cols-2 gap-1 text-sm">
             {(Object.entries(entry.ratings) as [string, number][]).map(([key, val]) => (
               <div key={key} className="flex items-center gap-1">

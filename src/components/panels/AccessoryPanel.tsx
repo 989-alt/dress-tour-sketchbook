@@ -1,5 +1,6 @@
 import type { AccessoryType } from '../../types';
 import { ACCESSORIES, ACCESSORY_ORDER } from '../../parts/accessories';
+import { ACCESSORY_GLOSSARY } from '../../lib/glossary';
 
 interface AccessoryPanelProps {
   value: AccessoryType;
@@ -38,6 +39,7 @@ export function AccessoryPanel({ value, onChange }: AccessoryPanelProps) {
             key={type}
             data-accessory-type={type}
             onClick={() => onChange(type)}
+            title={ACCESSORY_GLOSSARY[type]}
             className={chip(value === type)}
           >
             <AccessoryPreview type={type} />

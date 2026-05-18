@@ -1,5 +1,6 @@
 import type { NecklineType } from '../../types';
 import { NECKLINES } from '../../parts/necklines';
+import { NECKLINE_GLOSSARY } from '../../lib/glossary';
 
 const NECKLINE_ORDER: NecklineType[] = [
   'sweetheart', 'vRegular', 'vDeep', 'vPlunging', 'halter',
@@ -23,6 +24,7 @@ export function NecklinePanel({ value, onChange }: NecklinePanelProps) {
             key={type}
             onClick={() => onChange(type)}
             data-neckline={type}
+            title={NECKLINE_GLOSSARY[type]}
             className={[
               'flex flex-col items-center gap-1 p-2 rounded border transition-colors',
               selected

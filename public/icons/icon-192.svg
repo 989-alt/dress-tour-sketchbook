@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="24" fill="#f4d8d4"/>
+  <!-- Simple A-line dress silhouette -->
+  <g fill="#c47a6a">
+    <!-- Head -->
+    <circle cx="96" cy="32" r="14"/>
+    <!-- Bodice: narrower trapezoid -->
+    <path d="M72 48 L120 48 L128 96 L64 96 Z"/>
+    <!-- Skirt: wide A-line flare -->
+    <path d="M64 96 L128 96 L152 172 L40 172 Z"/>
+  </g>
+</svg>
