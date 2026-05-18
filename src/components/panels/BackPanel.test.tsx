@@ -66,20 +66,20 @@ describe('BackPanel', () => {
     expect(onChange).toHaveBeenCalledWith({ type: 'openBack', openDepth: 3 });
   });
 
-  it('selected back type chip has border-blue-500 styling', () => {
+  it('selected back type chip has border-rose-400 styling', () => {
     render(<BackPanel value={{ type: 'keyhole', openDepth: 0 }} onChange={vi.fn()} />);
     const keyhole = screen.getAllByRole('button').find((b) => b.getAttribute('data-back-type') === 'keyhole');
     const closed = screen.getAllByRole('button').find((b) => b.getAttribute('data-back-type') === 'closed');
-    expect(keyhole?.className).toContain('border-blue-500');
-    expect(closed?.className).not.toContain('border-blue-500');
+    expect(keyhole?.className).toContain('border-rose-400');
+    expect(closed?.className).not.toContain('border-rose-400');
   });
 
-  it('selected depth button has border-blue-500 styling', () => {
+  it('selected depth button has border-rose-400 styling', () => {
     render(<BackPanel value={{ type: 'openBack', openDepth: 3 }} onChange={vi.fn()} />);
     const d3 = screen.getAllByRole('button').find((b) => b.getAttribute('data-open-depth') === '3');
     const d0 = screen.getAllByRole('button').find((b) => b.getAttribute('data-open-depth') === '0');
-    expect(d3?.className).toContain('border-blue-500');
-    expect(d0?.className).not.toContain('border-blue-500');
+    expect(d3?.className).toContain('border-rose-400');
+    expect(d0?.className).not.toContain('border-rose-400');
   });
 
   it('Korean labels are displayed for all back types', () => {

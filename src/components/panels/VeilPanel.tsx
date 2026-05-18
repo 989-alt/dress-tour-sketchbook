@@ -11,10 +11,10 @@ interface VeilPanelProps {
 
 function chip(active: boolean) {
   return [
-    'px-2 py-1 rounded border text-xs transition-colors',
+    'px-2 py-1 rounded-xl border text-xs transition-colors',
     active
-      ? 'border-blue-500 bg-blue-50 text-blue-700'
-      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+      ? 'border-rose-400 bg-rose-50 text-rose-600'
+      : 'border-ink-100/60 bg-cream-50 text-ink-900 hover:bg-cream-100',
   ].join(' ');
 }
 
@@ -44,7 +44,7 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
     <div className="flex flex-col gap-4">
       {/* Length */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">길이</p>
+        <p className="label-caps mb-1">길이</p>
         <div className="grid grid-cols-3 gap-2">
           {VEIL_LENGTH_ORDER.map((l) => (
             <PreviewChip
@@ -63,7 +63,7 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
       {/* Edge — only when veil is active */}
       {hasVeil && (
         <div>
-          <p className="text-xs font-semibold text-gray-600 mb-1">가장자리</p>
+          <p className="label-caps mb-1">가장자리</p>
           <div className="grid grid-cols-2 gap-2">
             {VEIL_EDGE_ORDER.map((e) => (
               <PreviewChip
@@ -83,7 +83,7 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
       {/* Layers — only when veil is active */}
       {hasVeil && (
         <div>
-          <p className="text-xs font-semibold text-gray-600 mb-1">레이어</p>
+          <p className="label-caps mb-1">레이어</p>
           <div className="flex gap-2">
             <button
               type="button"

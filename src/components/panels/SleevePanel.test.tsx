@@ -74,20 +74,20 @@ describe('SleevePanel', () => {
     expect(onChange).toHaveBeenCalledWith({ type: 'bell', material: 'beaded' });
   });
 
-  it('selected sleeve chip has border-blue-500 styling', () => {
+  it('selected sleeve chip has border-rose-400 styling', () => {
     render(<SleevePanel value={{ type: 'cap', material: 'opaque' }} onChange={vi.fn()} />);
     const cap = screen.getAllByRole('button').find((b) => b.getAttribute('data-sleeve') === 'cap');
     const long = screen.getAllByRole('button').find((b) => b.getAttribute('data-sleeve') === 'long');
-    expect(cap?.className).toContain('border-blue-500');
-    expect(long?.className).not.toContain('border-blue-500');
+    expect(cap?.className).toContain('border-rose-400');
+    expect(long?.className).not.toContain('border-rose-400');
   });
 
-  it('selected material chip has border-blue-500 styling', () => {
+  it('selected material chip has border-rose-400 styling', () => {
     render(<SleevePanel value={{ type: 'cap', material: 'sheer' }} onChange={vi.fn()} />);
     const sheer = screen.getAllByRole('button').find((b) => b.getAttribute('data-material') === 'sheer');
     const lace = screen.getAllByRole('button').find((b) => b.getAttribute('data-material') === 'lace');
-    expect(sheer?.className).toContain('border-blue-500');
-    expect(lace?.className).not.toContain('border-blue-500');
+    expect(sheer?.className).toContain('border-rose-400');
+    expect(lace?.className).not.toContain('border-rose-400');
   });
 
   it('Korean material labels are displayed', () => {

@@ -8,42 +8,44 @@ interface BasicPanelProps {
 }
 
 export function BasicPanel({ entry, onChange }: BasicPanelProps) {
+  const inputCls = 'w-full bg-cream-50 border border-ink-100/60 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200';
+
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">별명</label>
+        <label className="block label-caps mb-1">별명</label>
         <input
           type="text"
-          className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className={inputCls}
           value={entry.nickname}
           onChange={(e) => onChange({ nickname: e.target.value })}
           placeholder="드레스 별명"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">매장</label>
+        <label className="block label-caps mb-1">매장</label>
         <input
           type="text"
-          className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className={inputCls}
           value={entry.shop}
           onChange={(e) => onChange({ shop: e.target.value })}
           placeholder="매장 이름"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">드레스#</label>
+        <label className="block label-caps mb-1">드레스#</label>
         <input
           type="text"
-          className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className={inputCls}
           value={entry.dressNo}
           onChange={(e) => onChange({ dressNo: e.target.value })}
           placeholder="드레스 번호"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">조명 메모</label>
+        <label className="block label-caps mb-1">조명 메모</label>
         <textarea
-          className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"
+          className={`${inputCls} resize-none`}
           rows={3}
           value={entry.lightingNote}
           onChange={(e) => onChange({ lightingNote: e.target.value })}

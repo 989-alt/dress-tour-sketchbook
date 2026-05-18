@@ -16,7 +16,7 @@ describe('AccessoryPanel', () => {
     const onChange = vi.fn();
     render(<AccessoryPanel value="tiara" onChange={onChange} />);
     const active = screen.getByRole('button', { name: /티아라/ });
-    expect(active.className).toContain('border-blue-500');
+    expect(active.className).toContain('border-rose-400');
   });
 
   it('clicking a chip calls onChange with that AccessoryType', () => {
@@ -45,6 +45,6 @@ describe('AccessoryPanel', () => {
     const onChange = vi.fn();
     render(<AccessoryPanel value="none" onChange={onChange} />);
     const noneBtn = document.querySelector('[data-accessory-type="none"]') as HTMLButtonElement;
-    expect(noneBtn.className).toContain('border-blue-500');
+    expect(noneBtn.className).toContain('border-rose-400');
   });
 });

@@ -40,10 +40,10 @@ interface SkirtPanelProps {
 
 function numericChip(active: boolean) {
   return [
-    'px-2 py-1 rounded border text-xs transition-colors',
+    'px-2 py-1 rounded-xl border text-xs transition-colors',
     active
-      ? 'border-blue-500 bg-blue-50 text-blue-700'
-      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+      ? 'border-rose-400 bg-rose-50 text-rose-600'
+      : 'border-ink-100/60 bg-cream-50 text-ink-900 hover:bg-cream-100',
   ].join(' ');
 }
 
@@ -52,7 +52,7 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
     <div className="flex flex-col gap-4">
       {/* Texture */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">텍스처</p>
+        <p className="label-caps mb-1">텍스처</p>
         <div className="grid grid-cols-3 gap-2">
           {TEXTURE_ORDER.map((t) => (
             <PreviewChip
@@ -71,7 +71,7 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
       {/* Tiered layers — only when texture=tiered */}
       {value.texture === 'tiered' && (
         <div>
-          <p className="text-xs font-semibold text-gray-600 mb-1">티어드 단 수</p>
+          <p className="label-caps mb-1">티어드 단 수</p>
           <div className="flex gap-2">
             {LAYER_VALUES.map((n) => (
               <button
@@ -90,7 +90,7 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
 
       {/* Slit */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">슬릿</p>
+        <p className="label-caps mb-1">슬릿</p>
         <div className="grid grid-cols-3 gap-2 mb-2">
           {SLIT_TYPES.map(({ key, label }) => (
             <PreviewChip
@@ -104,7 +104,7 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
             />
           ))}
         </div>
-        <p className="text-xs text-gray-500 mb-1">높이</p>
+        <p className="label-caps mb-1">높이</p>
         <div className="flex gap-2">
           {HEIGHT_VALUES.map((h) => (
             <button
@@ -122,7 +122,7 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
 
       {/* Train */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">트레인</p>
+        <p className="label-caps mb-1">트레인</p>
         <div className="grid grid-cols-3 gap-2">
           {TRAIN_ORDER.map(({ key, label }) => (
             <PreviewChip

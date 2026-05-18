@@ -29,14 +29,14 @@ export function PreviewChip({
       disabled={disabled}
       {...dataAttrs}
       className={[
-        'flex flex-col items-stretch gap-1 p-2 rounded border transition-colors text-left',
+        'flex flex-col items-stretch gap-1 p-2 rounded-xl border transition-colors text-left',
         selected
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-200 bg-white hover:bg-gray-50',
+          ? 'border-rose-400 bg-rose-50'
+          : 'border-ink-100/60 bg-white hover:border-ink-300',
       ].join(' ')}
     >
       {(svgFallback || previewSrc) && (
-        <div className="relative aspect-[4/5] bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-[4/5] bg-cream-100 rounded-lg overflow-hidden flex items-center justify-center">
           {svgFallback && (
             <div className="absolute inset-0 flex items-center justify-center">
               {svgFallback}
@@ -55,8 +55,8 @@ export function PreviewChip({
         </div>
       )}
       <div>
-        <div className="font-medium text-xs text-gray-700">{label}</div>
-        <div className="text-xs text-gray-500 leading-tight">{description}</div>
+        <div className="font-medium text-xs text-ink-900">{label}</div>
+        <div className="text-xs text-ink-400 leading-tight">{description}</div>
       </div>
     </button>
   );

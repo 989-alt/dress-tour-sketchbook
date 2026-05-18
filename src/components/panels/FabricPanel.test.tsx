@@ -86,7 +86,7 @@ describe('FabricPanel', () => {
     expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_VALUE, veil: 'mikado' });
   });
 
-  it('selected bodice chip has border-blue-500 styling', () => {
+  it('selected bodice chip has border-rose-400 styling', () => {
     render(<FabricPanel value={{ ...DEFAULT_VALUE, bodice: 'taffeta' }} onChange={vi.fn()} />);
     const selected = screen.getAllByRole('button').find(
       (b) => b.getAttribute('data-region') === 'bodice' && b.getAttribute('data-fabric') === 'taffeta',
@@ -94,8 +94,8 @@ describe('FabricPanel', () => {
     const other = screen.getAllByRole('button').find(
       (b) => b.getAttribute('data-region') === 'bodice' && b.getAttribute('data-fabric') === 'satin',
     );
-    expect(selected?.className).toContain('border-blue-500');
-    expect(other?.className).not.toContain('border-blue-500');
+    expect(selected?.className).toContain('border-rose-400');
+    expect(other?.className).not.toContain('border-rose-400');
   });
 
   it('Korean fabric labels are displayed (each appearing 4 times)', () => {

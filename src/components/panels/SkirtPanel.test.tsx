@@ -109,12 +109,12 @@ describe('SkirtPanel', () => {
     expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_VALUE, texture: 'tiered', layers: 4 });
   });
 
-  it('selected texture chip has border-blue-500 styling', () => {
+  it('selected texture chip has border-rose-400 styling', () => {
     render(<SkirtPanel value={{ ...DEFAULT_VALUE, texture: 'gathered' }} onChange={vi.fn()} />);
     const gathered = screen.getAllByRole('button').find((b) => b.getAttribute('data-texture') === 'gathered');
     const smooth = screen.getAllByRole('button').find((b) => b.getAttribute('data-texture') === 'smooth');
-    expect(gathered?.className).toContain('border-blue-500');
-    expect(smooth?.className).not.toContain('border-blue-500');
+    expect(gathered?.className).toContain('border-rose-400');
+    expect(smooth?.className).not.toContain('border-rose-400');
   });
 
   it('renders Korean labels for all textures', () => {

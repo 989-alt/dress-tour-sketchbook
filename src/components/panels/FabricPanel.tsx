@@ -61,7 +61,7 @@ export function FabricPanel({ value, onChange }: FabricPanelProps) {
     <div className="flex flex-col gap-4">
       {REGION_ORDER.map((region) => (
         <div key={region}>
-          <p className="text-xs font-semibold text-gray-600 mb-1">{REGION_LABELS[region]}</p>
+          <p className="label-caps mb-1">{REGION_LABELS[region]}</p>
           <div className="grid grid-cols-4 gap-1">
             {FABRIC_ORDER.map((fabric) => (
               <FabricChip

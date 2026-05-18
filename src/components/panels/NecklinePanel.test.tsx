@@ -33,23 +33,23 @@ describe('NecklinePanel', () => {
     expect(onChange).toHaveBeenCalledWith('scoop');
   });
 
-  it('selected chip has border-blue-500 styling', () => {
+  it('selected chip has border-rose-400 styling', () => {
     render(<NecklinePanel value="square" onChange={vi.fn()} />);
     const chips = screen.getAllByRole('button');
     const squareChip = chips.find((c) => c.getAttribute('data-neckline') === 'square');
     const boatChip = chips.find((c) => c.getAttribute('data-neckline') === 'boat');
-    expect(squareChip?.className).toContain('border-blue-500');
-    expect(boatChip?.className).not.toContain('border-blue-500');
+    expect(squareChip?.className).toContain('border-rose-400');
+    expect(boatChip?.className).not.toContain('border-rose-400');
   });
 
   it('re-render changes selected chip styling', () => {
     const { rerender } = render(<NecklinePanel value="sweetheart" onChange={vi.fn()} />);
     const getChip = (type: string) =>
       screen.getAllByRole('button').find((c) => c.getAttribute('data-neckline') === type);
-    expect(getChip('sweetheart')?.className).toContain('border-blue-500');
-    expect(getChip('highNeck')?.className).not.toContain('border-blue-500');
+    expect(getChip('sweetheart')?.className).toContain('border-rose-400');
+    expect(getChip('highNeck')?.className).not.toContain('border-rose-400');
     rerender(<NecklinePanel value="highNeck" onChange={vi.fn()} />);
-    expect(getChip('sweetheart')?.className).not.toContain('border-blue-500');
-    expect(getChip('highNeck')?.className).toContain('border-blue-500');
+    expect(getChip('sweetheart')?.className).not.toContain('border-rose-400');
+    expect(getChip('highNeck')?.className).toContain('border-rose-400');
   });
 });

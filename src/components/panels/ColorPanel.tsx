@@ -44,19 +44,19 @@ function ColorSwatch({
       onClick={onSelect}
       className="flex flex-col items-center gap-0.5 p-1 rounded border transition-colors text-center"
       style={{
-        borderColor: selected ? '#3b82f6' : '#d1d5db',
-        backgroundColor: selected ? '#eff6ff' : 'transparent',
+        borderColor: selected ? '#f08080' : '#e5e0d8',
+        backgroundColor: selected ? '#fff0f0' : 'transparent',
       }}
     >
       <div
-        className="w-7 h-7 rounded-full border border-gray-200"
+        className="w-7 h-7 rounded-full border border-ink-100/60"
         style={{ backgroundColor: COLOR_HEX[color] }}
         aria-label={COLOR_LABELS[color]}
       />
-      <span className="text-xs text-gray-700 leading-tight" style={{ fontSize: '10px' }}>
+      <span className="text-xs text-ink-900 leading-tight" style={{ fontSize: '10px' }}>
         {COLOR_LABELS[color]}
       </span>
-      <span className="text-gray-400 leading-tight" style={{ fontSize: '9px' }}>
+      <span className="text-ink-400 leading-tight" style={{ fontSize: '9px' }}>
         {COLOR_SHORT[color]}
       </span>
     </button>
@@ -104,7 +104,7 @@ export function ColorPanel({ value, onChange }: ColorPanelProps) {
     <div className="flex flex-col gap-5">
       {/* Primary */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-2">메인 색상</p>
+        <p className="label-caps mb-2">메인 색상</p>
         <SwatchRow
           selected={value.primary}
           data-section="primary"
@@ -114,7 +114,7 @@ export function ColorPanel({ value, onChange }: ColorPanelProps) {
 
       {/* Gradient toggle */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-2">그라데이션</p>
+        <p className="label-caps mb-2">그라데이션</p>
         <div className="flex gap-2 mb-3">
           {(['solid', 'ombre'] as const).map((g) => (
             <button
@@ -123,10 +123,10 @@ export function ColorPanel({ value, onChange }: ColorPanelProps) {
               data-gradient={g}
               onClick={() => setGradient(g)}
               className={[
-                'px-3 py-1 rounded border text-xs transition-colors',
+                'px-3 py-1 rounded-xl border text-xs transition-colors',
                 value.gradient === g
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+                  ? 'border-rose-400 bg-rose-50 text-rose-600'
+                  : 'border-ink-100/60 bg-cream-50 text-ink-900 hover:bg-cream-100',
               ].join(' ')}
             >
               {g === 'solid' ? '단색' : '옴브레'}
@@ -136,7 +136,7 @@ export function ColorPanel({ value, onChange }: ColorPanelProps) {
 
         {value.gradient === 'ombre' && (
           <div>
-            <p className="text-xs text-gray-500 mb-2">보조 색상</p>
+            <p className="label-caps mb-2">보조 색상</p>
             <SwatchRow
               selected={value.secondary}
               data-section="secondary"
@@ -148,7 +148,7 @@ export function ColorPanel({ value, onChange }: ColorPanelProps) {
 
       {/* Accent */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-2">액센트 색상</p>
+        <p className="label-caps mb-2">액센트 색상</p>
         <SwatchRow
           selected={value.accent}
           data-section="accent"

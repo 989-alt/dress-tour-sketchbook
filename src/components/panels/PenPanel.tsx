@@ -78,7 +78,7 @@ export function PenPanel({
     <div className="space-y-4">
       {/* Brush size */}
       <div>
-        <p className="text-xs font-medium text-gray-600 mb-1.5">펜 굵기</p>
+        <p className="label-caps mb-1.5">펜 굵기</p>
         <div className="flex gap-1">
           {BRUSH_SIZES.map(({ id, label }) => (
             <button
@@ -86,10 +86,10 @@ export function PenPanel({
               onClick={() => onBrushSizeChange(id)}
               data-brush={id}
               className={[
-                'flex-1 py-1 text-xs rounded border transition-colors',
+                'flex-1 py-1 text-xs rounded-xl border transition-colors',
                 brushSize === id
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-600',
+                  ? 'border-rose-400 bg-rose-50 text-rose-600'
+                  : 'border-ink-100/60 bg-cream-50 hover:bg-cream-100 text-ink-400',
               ].join(' ')}
             >
               {label}
@@ -100,7 +100,7 @@ export function PenPanel({
 
       {/* Color */}
       <div>
-        <p className="text-xs font-medium text-gray-600 mb-1.5">색상</p>
+        <p className="label-caps mb-1.5">색상</p>
         <div className="flex gap-2">
           {COLORS.map(({ id, hex, label }) => (
             <button
@@ -111,7 +111,7 @@ export function PenPanel({
               title={label}
               className={[
                 'w-8 h-8 rounded-full border-2 transition-transform',
-                color === id ? 'border-blue-500 scale-110' : 'border-transparent hover:scale-105',
+                color === id ? 'border-rose-400 scale-110' : 'border-transparent hover:scale-105',
               ].join(' ')}
               style={{ backgroundColor: hex }}
             />
@@ -123,10 +123,10 @@ export function PenPanel({
       <button
         onClick={() => onAcceptFingerChange(!acceptFinger)}
         className={[
-          'w-full py-1.5 text-sm rounded border transition-colors',
+          'w-full py-1.5 text-sm rounded-xl border transition-colors',
           acceptFinger
-            ? 'border-blue-500 bg-blue-50 text-blue-700'
-            : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-600',
+            ? 'border-rose-400 bg-rose-50 text-rose-600'
+            : 'border-ink-100/60 bg-cream-50 hover:bg-cream-100 text-ink-400',
         ].join(' ')}
         aria-pressed={acceptFinger}
         data-testid="finger-toggle"
@@ -138,13 +138,13 @@ export function PenPanel({
       <div className="flex gap-2">
         <button
           onClick={onUndo}
-          className="flex-1 py-1.5 text-sm rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
+          className="flex-1 py-1.5 text-sm rounded-xl border border-ink-100/60 bg-cream-50 hover:bg-cream-100 text-ink-900"
         >
           실행 취소
         </button>
         <button
           onClick={onClearInProgress}
-          className="flex-1 py-1.5 text-sm rounded border border-red-300 bg-white hover:bg-red-50 text-red-600"
+          className="flex-1 py-1.5 text-sm rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600"
         >
           전체 취소
         </button>
@@ -154,35 +154,35 @@ export function PenPanel({
       <button
         onClick={handleFinishRegion}
         data-testid="finish-region"
-        className="w-full py-2 text-sm rounded border border-green-500 bg-green-50 text-green-700 hover:bg-green-100 font-medium"
+        className="btn-primary w-full py-2 text-sm font-medium"
       >
         ✓ 이 영역 완료
       </button>
 
       {/* Inline prompt entry after finish */}
       {pendingPathData && (
-        <div className="border border-gray-300 rounded p-3 bg-gray-50 space-y-2" data-testid="prompt-form">
-          <p className="text-xs text-gray-600">이 영역에 적용할 변경 사항을 입력하세요</p>
+        <div className="border border-ink-100/60 rounded-xl p-3 bg-cream-50 space-y-2" data-testid="prompt-form">
+          <p className="text-xs text-ink-400">이 영역에 적용할 변경 사항을 입력하세요</p>
           <textarea
             value={promptText}
             onChange={(e) => setPromptText(e.target.value)}
             placeholder="예: 여기에 레이스 추가"
             rows={2}
             aria-label="영역 프롬프트 입력"
-            className="w-full text-xs border border-gray-300 rounded px-2 py-1 resize-none focus:outline-none focus:border-blue-400"
+            className="w-full text-xs bg-cream-50 border border-ink-100/60 rounded-xl px-2 py-1 resize-none focus:outline-none focus:ring-2 focus:ring-rose-200"
           />
           <div className="flex gap-2">
             <button
               onClick={handleSaveRegion}
               data-testid="save-region"
-              className="flex-1 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700"
+              className="btn-primary flex-1 py-1.5 text-xs"
             >
               저장
             </button>
             <button
               onClick={handleCancelRegion}
               data-testid="cancel-region"
-              className="flex-1 py-1.5 text-xs rounded border border-gray-300 bg-white hover:bg-gray-50 text-gray-600"
+              className="flex-1 py-1.5 text-xs rounded-xl border border-ink-100/60 bg-cream-50 hover:bg-cream-100 text-ink-400"
             >
               취소
             </button>
@@ -193,25 +193,21 @@ export function PenPanel({
       {/* Saved regions list */}
       {savedRegions.length > 0 && (
         <div className="space-y-1.5" data-testid="saved-regions-list">
-          <p className="text-xs font-medium text-gray-600">저장된 영역</p>
+          <p className="label-caps">저장된 영역</p>
           {savedRegions.map((region, idx) => (
             <div
               key={region.id}
-              className="flex items-start gap-2 text-xs bg-white border border-gray-200 rounded px-2 py-1.5"
+              className="flex items-start gap-2 text-xs bg-cream-50 border-l-4 border-ink-100/60 rounded px-2 py-1.5"
+              style={{ borderLeftColor: `hsl(${region.hue}, 55%, 65%)` }}
               data-testid={`saved-region-${region.id}`}
             >
-              <span
-                className="mt-0.5 w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: `hsl(${region.hue}, 70%, 50%)` }}
-                aria-hidden="true"
-              />
-              <span className="flex-1 text-gray-700 min-w-0 break-words">
+              <span className="flex-1 text-ink-900 min-w-0 break-words">
                 영역 {idx + 1}{region.prompt ? `: "${region.prompt}"` : ''}
               </span>
               <button
                 onClick={() => onRegionDelete(region.id)}
                 aria-label={`영역 ${idx + 1} 삭제`}
-                className="shrink-0 text-gray-400 hover:text-red-500 leading-none"
+                className="shrink-0 text-ink-400 hover:text-rose-500 leading-none"
               >
                 ✕
               </button>

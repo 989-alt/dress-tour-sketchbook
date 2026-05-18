@@ -28,7 +28,7 @@ export function BackPanel({ value, onChange }: BackPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">등판 스타일</p>
+        <p className="label-caps mb-1">등판 스타일</p>
         <div className="grid grid-cols-3 gap-2">
           {BACK_ORDER.map((bt) => (
             <PreviewChip
@@ -46,7 +46,7 @@ export function BackPanel({ value, onChange }: BackPanelProps) {
 
       {value.type === 'openBack' && (
         <div>
-          <p className="text-xs font-semibold text-gray-600 mb-1">개방 깊이</p>
+          <p className="label-caps mb-1">개방 깊이</p>
           <div className="flex gap-2">
             {DEPTH_VALUES.map((d) => (
               <button
@@ -55,10 +55,10 @@ export function BackPanel({ value, onChange }: BackPanelProps) {
                 data-open-depth={d}
                 onClick={() => setDepth(d)}
                 className={[
-                  'w-8 h-8 rounded border text-xs transition-colors',
+                  'w-8 h-8 rounded-xl border text-xs transition-colors',
                   d === value.openDepth
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+                    ? 'border-rose-400 bg-rose-50 text-rose-600'
+                    : 'border-ink-100/60 bg-cream-50 text-ink-900 hover:bg-cream-100',
                 ].join(' ')}
               >
                 {d}

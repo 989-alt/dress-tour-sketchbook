@@ -40,7 +40,7 @@ describe('PreviewChip', () => {
       <PreviewChip selected={true} onClick={() => {}} label="시스" description="직선형" />,
     );
     const btn = container.querySelector('button');
-    expect(btn?.className).toContain('border-blue-500');
+    expect(btn?.className).toContain('border-rose-400');
   });
 
   it('applies unselected border class when selected=false', () => {
@@ -48,7 +48,7 @@ describe('PreviewChip', () => {
       <PreviewChip selected={false} onClick={() => {}} label="시스" description="직선형" />,
     );
     const btn = container.querySelector('button');
-    expect(btn?.className).toContain('border-gray-200');
+    expect(btn?.className).toContain('border-ink-100/60');
   });
 
   it('renders img when previewSrc is provided', () => {

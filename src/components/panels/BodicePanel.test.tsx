@@ -91,28 +91,28 @@ describe('BodicePanel', () => {
     expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_VALUE, accentColor: 'blush' });
   });
 
-  it('selected waist position chip has border-blue-500 styling', () => {
+  it('selected waist position chip has border-rose-400 styling', () => {
     render(<BodicePanel value={{ ...DEFAULT_VALUE, waistPosition: 'empire' }} onChange={vi.fn()} />);
     const empire = screen.getAllByRole('button').find((b) => b.getAttribute('data-waist-position') === 'empire');
     const natural = screen.getAllByRole('button').find((b) => b.getAttribute('data-waist-position') === 'natural');
-    expect(empire?.className).toContain('border-blue-500');
-    expect(natural?.className).not.toContain('border-blue-500');
+    expect(empire?.className).toContain('border-rose-400');
+    expect(natural?.className).not.toContain('border-rose-400');
   });
 
-  it('selected structure chip has border-blue-500 styling', () => {
+  it('selected structure chip has border-rose-400 styling', () => {
     render(<BodicePanel value={{ ...DEFAULT_VALUE, structure: 'corset' }} onChange={vi.fn()} />);
     const corset = screen.getAllByRole('button').find((b) => b.getAttribute('data-structure') === 'corset');
     const softFit = screen.getAllByRole('button').find((b) => b.getAttribute('data-structure') === 'softFit');
-    expect(corset?.className).toContain('border-blue-500');
-    expect(softFit?.className).not.toContain('border-blue-500');
+    expect(corset?.className).toContain('border-rose-400');
+    expect(softFit?.className).not.toContain('border-rose-400');
   });
 
-  it('selected accent color swatch has border-blue-500 styling', () => {
+  it('selected accent color swatch has border-rose-400 styling', () => {
     render(<BodicePanel value={{ ...DEFAULT_VALUE, accentColor: 'blush' }} onChange={vi.fn()} />);
     const blush = screen.getAllByRole('button').find((b) => b.getAttribute('data-accent-color') === 'blush');
     const ivory = screen.getAllByRole('button').find((b) => b.getAttribute('data-accent-color') === 'ivory');
-    expect(blush?.className).toContain('border-blue-500');
-    expect(ivory?.className).not.toContain('border-blue-500');
+    expect(blush?.className).toContain('border-rose-400');
+    expect(ivory?.className).not.toContain('border-rose-400');
   });
 
   it('renders section headings in Korean', () => {

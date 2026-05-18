@@ -53,12 +53,12 @@ describe('ColorPanel', () => {
     expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_VALUE, accent: 'gold' });
   });
 
-  it('solid is selected by default — 단색 button has border-blue-500', () => {
+  it('solid is selected by default — 단색 button has active styling', () => {
     render(<ColorPanel value={DEFAULT_VALUE} onChange={vi.fn()} />);
     const solidBtn = screen.getAllByRole('button').find(
       (b) => b.getAttribute('data-gradient') === 'solid',
     );
-    expect(solidBtn?.className).toContain('border-blue-500');
+    expect(solidBtn?.className).toContain('border-rose-400');
   });
 
   it('secondary swatches are NOT shown when gradient=solid', () => {

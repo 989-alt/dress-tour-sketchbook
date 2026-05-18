@@ -36,11 +36,11 @@ describe('SilhouettePanel', () => {
     const chips = screen.getAllByRole('button');
     const alineChip = chips.find((c) => c.getAttribute('data-silhouette') === 'aline');
     const mermaidChip = chips.find((c) => c.getAttribute('data-silhouette') === 'mermaid');
-    expect(alineChip?.className).toContain('border-blue-500');
-    expect(mermaidChip?.className).not.toContain('border-blue-500');
+    expect(alineChip?.className).toContain('border-rose-400');
+    expect(mermaidChip?.className).not.toContain('border-rose-400');
     rerender(<SilhouettePanel value="mermaid" onChange={vi.fn()} />);
     const newChips = screen.getAllByRole('button');
     const newMermaid = newChips.find((c) => c.getAttribute('data-silhouette') === 'mermaid');
-    expect(newMermaid?.className).toContain('border-blue-500');
+    expect(newMermaid?.className).toContain('border-rose-400');
   });
 });

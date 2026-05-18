@@ -28,7 +28,7 @@ function EntryColumn({
   photoHeight: number;
 }) {
   return (
-    <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+    <div className="card flex-1 flex flex-col items-center gap-2 min-w-0 p-3">
       {photo && (
         <div className="w-36">
           <DressCanvas
@@ -42,26 +42,26 @@ function EntryColumn({
           />
         </div>
       )}
-      <p className="font-semibold text-gray-800 text-sm text-center truncate w-full px-1">
+      <p className="font-semibold text-ink-900 text-sm text-center truncate w-full px-1">
         {entry.nickname || '이름 없음'}
       </p>
       {entry.shop && (
-        <p className="text-xs text-gray-500 text-center">{entry.shop}</p>
+        <p className="text-xs text-ink-400 text-center">{entry.shop}</p>
       )}
-      <p className="text-yellow-500 text-sm">⭐ {totalStars(entry)}</p>
+      <p className="text-gold text-sm">⭐ {totalStars(entry)}</p>
       {entry.dressNo && (
-        <p className="text-xs text-gray-400">No. {entry.dressNo}</p>
+        <p className="text-xs text-ink-400">No. {entry.dressNo}</p>
       )}
       {(entry.pros.length > 0 || entry.cons.length > 0) && (
         <div className="w-full text-xs space-y-1 px-1">
           {entry.pros.length > 0 && (
-            <p className="text-green-700 font-medium">
+            <p className="text-rose-500 font-medium">
               장점: {entry.pros.slice(0, 2).join(', ')}
               {entry.pros.length > 2 && ' …'}
             </p>
           )}
           {entry.cons.length > 0 && (
-            <p className="text-red-600 font-medium">
+            <p className="text-ink-400 font-medium">
               단점: {entry.cons.slice(0, 2).join(', ')}
               {entry.cons.length > 2 && ' …'}
             </p>
@@ -107,7 +107,7 @@ export function CompareModal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 overflow-auto py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 backdrop-blur-sm overflow-auto py-8"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
       }}
@@ -115,16 +115,16 @@ export function CompareModal({
       aria-modal="true"
       aria-label="드레스 비교"
     >
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 p-6">
+      <div className="card-lg relative w-full max-w-xl mx-4 p-6">
         <button
           onClick={onClose}
-          className="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-xl leading-none"
+          className="btn-ghost absolute top-3 right-4 text-xl leading-none"
           aria-label="닫기"
         >
           ✕
         </button>
 
-        <h2 className="text-base font-semibold text-gray-800 mb-4 text-center">드레스 비교</h2>
+        <h2 className="text-base font-semibold text-ink-900 mb-4 text-center">드레스 비교</h2>
 
         <div className="flex gap-4 items-start">
           <EntryColumn
@@ -133,7 +133,7 @@ export function CompareModal({
             photoWidth={photoDims.w}
             photoHeight={photoDims.h}
           />
-          <div className="w-px bg-gray-200 self-stretch" />
+          <div className="w-px bg-ink-100/60 self-stretch" />
           <EntryColumn
             entry={entryB}
             photo={photo}
@@ -144,7 +144,7 @@ export function CompareModal({
 
         <button
           onClick={onClose}
-          className="mt-5 w-full py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50"
+          className="mt-5 w-full py-2 border border-ink-100/60 text-ink-400 rounded-xl text-sm hover:bg-cream-50"
         >
           닫기
         </button>

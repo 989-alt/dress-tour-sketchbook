@@ -76,33 +76,34 @@ export function PhotoUploadModal({ onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
+      <div className="card-lg relative w-full max-w-lg mx-4 p-6">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-xl leading-none"
+          className="btn-ghost absolute top-3 right-4 text-xl leading-none"
           aria-label="취소"
         >
           ✕
         </button>
 
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">베이스 사진 업로드</h2>
+        <h2 className="text-lg font-semibold text-ink-900 mb-4">베이스 사진 업로드</h2>
 
         {step.kind === 'idle' && (
           <div className="flex flex-col items-center gap-4 py-6">
-            <p className="text-sm text-gray-500 text-center">
+            <p className="text-sm text-ink-400 text-center">
               전신이 잘 보이는 사진을 선택해 주세요.
             </p>
             <button
               onClick={() => inputRef.current?.click()}
-              className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
+              className="w-full py-7 border-2 border-dashed border-rose-200 hover:border-rose-300 hover:bg-rose-50/50 text-rose-500 rounded-xl text-sm font-medium transition-colors"
             >
-              사진 선택
+              <span className="block text-base font-semibold mb-1">사진 선택</span>
+              <span className="block text-xs text-ink-400 font-normal">얼굴이 마스킹된 신부 전신 사진 권장</span>
             </button>
             <input
               ref={inputRef}
@@ -118,27 +119,27 @@ export function PhotoUploadModal({ onClose }: Props) {
         )}
 
         {step.kind === 'detecting' && (
-          <div className="flex items-center justify-center py-12 text-sm text-gray-500">
+          <div className="flex items-center justify-center py-12 text-sm text-ink-400">
             포즈 검출 중…
           </div>
         )}
 
         {step.kind === 'fallback' && (
           <div className="flex flex-col items-center gap-4 py-6">
-            <p className="text-sm text-gray-600 text-center">
+            <p className="text-sm text-ink-900 text-center">
               포즈를 찾지 못했습니다. 수동 배치로 진행하시겠어요?
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => confirmFallback(step.blob)}
                 disabled={saving}
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+                className="btn-primary px-5 py-2 text-sm disabled:opacity-50"
               >
                 {saving ? '저장 중…' : '수동 배치로 진행'}
               </button>
               <button
                 onClick={onClose}
-                className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50"
+                className="px-5 py-2 border border-ink-100/60 text-ink-400 rounded-xl text-sm hover:bg-cream-50"
               >
                 취소
               </button>
@@ -148,18 +149,18 @@ export function PhotoUploadModal({ onClose }: Props) {
 
         {step.kind === 'preview' && (
           <div className="flex flex-col items-center gap-4 py-4">
-            <p className="text-sm text-gray-500">포즈 검출 완료! 이 사진으로 진행하시겠어요?</p>
+            <p className="text-sm text-ink-400">포즈 검출 완료! 이 사진으로 진행하시겠어요?</p>
             <div className="flex gap-3">
               <button
                 onClick={() => confirmPreview(step.meta)}
                 disabled={saving}
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+                className="btn-primary px-5 py-2 text-sm disabled:opacity-50"
               >
                 {saving ? '저장 중…' : '확인'}
               </button>
               <button
                 onClick={onClose}
-                className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50"
+                className="px-5 py-2 border border-ink-100/60 text-ink-400 rounded-xl text-sm hover:bg-cream-50"
               >
                 취소
               </button>

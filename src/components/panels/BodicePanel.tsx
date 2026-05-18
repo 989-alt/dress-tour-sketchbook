@@ -44,7 +44,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
     <div className="flex flex-col gap-4">
       {/* 허리 위치 */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">허리 위치</p>
+        <p className="label-caps mb-1">허리 위치</p>
         <div className="grid grid-cols-3 gap-2">
           {WAIST_POSITIONS.map(({ value: v, label }) => (
             <PreviewChip
@@ -62,7 +62,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
 
       {/* 보디스 구조 */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">보디스 구조</p>
+        <p className="label-caps mb-1">보디스 구조</p>
         <div className="grid grid-cols-2 gap-2">
           {STRUCTURE_ORDER.map((s) => (
             <PreviewChip
@@ -80,7 +80,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
 
       {/* 허리 액센트 */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">허리 액센트</p>
+        <p className="label-caps mb-1">허리 액센트</p>
         <div className="grid grid-cols-3 gap-2">
           {ACCENT_ORDER.map((a) => (
             <PreviewChip
@@ -98,7 +98,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
 
       {/* 액센트 색상 */}
       <div>
-        <p className="text-xs font-semibold text-gray-600 mb-1">액센트 색상</p>
+        <p className="label-caps mb-1">액센트 색상</p>
         <div className="flex flex-wrap gap-2">
           {COLOR_ORDER.map((c) => (
             <button
@@ -108,7 +108,7 @@ export function BodicePanel({ value, onChange }: BodicePanelProps) {
               onClick={() => set({ accentColor: c })}
               className={[
                 'w-6 h-6 rounded-full border-2 transition-colors',
-                c === value.accentColor ? 'border-blue-500' : 'border-gray-300',
+                c === value.accentColor ? 'border-rose-400 ring-1 ring-rose-200' : 'border-ink-100/60',
               ].join(' ')}
               style={{ backgroundColor: COLOR_HEX[c] }}
             />

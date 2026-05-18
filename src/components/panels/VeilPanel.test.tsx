@@ -93,6 +93,6 @@ describe('VeilPanel', () => {
       <VeilPanel value={{ length: 'waltz', edge: 'cut', layers: 1 }} onChange={() => {}} />,
     );
     const waltzBtn = container.querySelector('[data-veil-length="waltz"]')!;
-    expect(waltzBtn.className).toContain('border-blue-500');
+    expect(waltzBtn.className).toContain('border-rose-400');
   });
 });

@@ -50,8 +50,8 @@ export function SleevePanel({ value, onChange }: SleevePanelProps) {
                 <svg viewBox="60 100 220 400" width={48} height={48} aria-hidden>
                   {def.renders ? (
                     <>
-                      <path d={def.paths.left}  fill={selected ? '#93c5fd' : '#d1d5db'} />
-                      <path d={def.paths.right} fill={selected ? '#93c5fd' : '#d1d5db'} />
+                      <path d={def.paths.left}  fill={selected ? '#f08080' : '#d1d5db'} />
+                      <path d={def.paths.right} fill={selected ? '#f08080' : '#d1d5db'} />
                     </>
                   ) : (
                     <line x1="130" y1="120" x2="270" y2="120" stroke="#9ca3af" strokeWidth="3" />

@@ -32,7 +32,7 @@ export function NecklinePanel({ value, onChange }: NecklinePanelProps) {
             svgFallback={
               <svg viewBox="100 100 200 120" width={60} height={36} aria-hidden>
                 <rect x="140" y="120" width="120" height="80" fill="#e5e7eb" />
-                <path d={def.cutoutPath} fill={selected ? '#93c5fd' : '#9ca3af'} />
+                <path d={def.cutoutPath} fill={selected ? '#f08080' : '#9ca3af'} />
               </svg>
             }
             dataAttrs={{ 'data-neckline': type }}

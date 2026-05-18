@@ -24,7 +24,7 @@ function AccessorySvgFallback({ type }: { type: AccessoryType }) {
 export function AccessoryPanel({ value, onChange }: AccessoryPanelProps) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs font-semibold text-gray-600">헤어 액세서리</p>
+      <p className="label-caps">헤어 액세서리</p>
       <div className="grid grid-cols-3 gap-2">
         {ACCESSORY_ORDER.map((type) => (
           <PreviewChip

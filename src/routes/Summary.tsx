@@ -99,42 +99,44 @@ export default function Summary() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-cream-100">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200 shrink-0">
-        <button
-          onClick={() => navigate('/')}
-          className="text-gray-500 hover:text-gray-800 text-xl leading-none"
-          aria-label="홈으로"
-        >
-          ←
-        </button>
-        <h1 className="text-lg font-bold text-gray-800 flex-1">요약</h1>
-        <button
-          onClick={() => {
-            if (compareMode) {
-              exitCompareMode();
-            } else {
-              setCompareMode(true);
-              setCompareSelecting([]);
-            }
-          }}
-          className={[
-            'text-sm px-3 py-1 rounded-lg font-medium transition-colors',
-            compareMode
-              ? 'bg-indigo-600 text-white'
-              : 'border border-gray-300 text-gray-600 hover:bg-gray-100',
-          ].join(' ')}
-          aria-pressed={compareMode}
-        >
-          비교
-        </button>
+      <header className="sticky top-0 z-40 bg-cream-50/80 backdrop-blur border-b border-ink-100/60 shrink-0">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <button
+            onClick={() => navigate('/')}
+            className="btn-ghost p-1 -ml-1 text-xl leading-none"
+            aria-label="홈으로"
+          >
+            ←
+          </button>
+          <h1 className="text-lg font-bold text-ink-900 flex-1">요약</h1>
+          <button
+            onClick={() => {
+              if (compareMode) {
+                exitCompareMode();
+              } else {
+                setCompareMode(true);
+                setCompareSelecting([]);
+              }
+            }}
+            className={[
+              'text-sm px-3 py-1.5 rounded-xl font-medium transition-colors',
+              compareMode
+                ? 'btn-primary'
+                : 'border border-ink-100/60 text-ink-400 hover:bg-cream-100',
+            ].join(' ')}
+            aria-pressed={compareMode}
+          >
+            비교
+          </button>
+        </div>
       </header>
 
       {/* Compare action bar */}
       {compareMode && (
-        <div className="flex items-center justify-between px-4 py-2 bg-indigo-50 border-b border-indigo-100 text-sm">
-          <span className="text-indigo-700">
+        <div className="flex items-center justify-between px-4 py-2 bg-rose-50 border-b border-rose-100 text-sm">
+          <span className="text-rose-600">
             {compareSelecting.length === 0
               ? '비교할 드레스 2개를 선택하세요'
               : compareSelecting.length === 1
@@ -144,7 +146,7 @@ export default function Summary() {
           <button
             onClick={openCompare}
             disabled={compareSelecting.length < 2}
-            className="px-3 py-1 bg-indigo-600 text-white rounded-lg disabled:opacity-40"
+            className="btn-primary px-3 py-1 text-sm disabled:opacity-40"
           >
             비교하기
           </button>
@@ -154,14 +156,14 @@ export default function Summary() {
       <main className="flex-1 overflow-auto px-4 py-4 space-y-4">
         {/* Sort selector */}
         <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500 font-medium" htmlFor="sort-select">
+          <label className="label-caps" htmlFor="sort-select">
             정렬
           </label>
           <select
             id="sort-select"
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="text-sm border border-gray-300 rounded-lg px-2 py-1 bg-white"
+            className="text-sm bg-cream-50 border border-ink-100/60 rounded-xl px-2 py-1"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -173,7 +175,7 @@ export default function Summary() {
 
         {/* Entry grid */}
         {sorted.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-12">아직 드레스가 없습니다.</p>
+          <p className="text-sm text-ink-400 text-center py-12">아직 드레스가 없습니다.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {sorted.map((entry) => {
@@ -183,12 +185,12 @@ export default function Summary() {
                   key={entry.id}
                   className={[
                     'relative',
-                    compareMode && isSelected ? 'ring-2 ring-indigo-500 rounded-xl' : '',
+                    compareMode && isSelected ? 'ring-2 ring-rose-400 rounded-2xl' : '',
                   ].join(' ')}
                 >
                   <EntryCard entry={entry} onClick={() => handleCardClick(entry)} />
                   {compareMode && isSelected && (
-                    <span className="absolute top-1 right-1 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute top-1 right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {compareSelecting.findIndex((e) => e.id === entry.id) + 1}
                     </span>
                   )}
@@ -200,16 +202,17 @@ export default function Summary() {
       </main>
 
       {/* Footer */}
-      <footer className="flex items-center justify-around px-4 py-3 bg-white border-t border-gray-200 shrink-0">
+      <footer className="flex items-center justify-around px-4 py-3 bg-cream-50/80 border-t border-ink-100/60 shrink-0">
         <button
           onClick={handlePngExport}
-          className="text-sm text-gray-500 hover:text-gray-800"
+          className="btn-ghost text-sm"
         >
           이미지로 내보내기
         </button>
+        <span className="text-ink-100">·</span>
         <button
           onClick={handleJsonExport}
-          className="text-sm text-gray-500 hover:text-gray-800"
+          className="btn-ghost text-sm"
         >
           JSON 받기
         </button>

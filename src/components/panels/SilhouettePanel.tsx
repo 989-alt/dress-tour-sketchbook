@@ -41,7 +41,7 @@ export function SilhouettePanel({ value, onChange }: SilhouettePanelProps) {
             previewSrc={previewUrl('silhouette', type)}
             svgFallback={
               <svg viewBox="0 0 400 800" width={36} height={72} aria-hidden>
-                <path d={def.bodyPath} fill={selected ? '#93c5fd' : '#d1d5db'} />
+                <path d={def.bodyPath} fill={selected ? '#f08080' : '#d1d5db'} />
               </svg>
             }
             dataAttrs={{ 'data-silhouette': type }}
