@@ -10,7 +10,7 @@ const DEFAULT_VALUE = {
   veil:    'tulle'  as FabricType,
 };
 
-const ALL_FABRICS: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta'];
+const ALL_FABRICS: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta', 'chunkyBeading', 'delicateBeading'];
 
 describe('FabricPanel', () => {
   it('renders 4 region rows', () => {
@@ -21,13 +21,13 @@ describe('FabricPanel', () => {
     expect(screen.getByText('베일')).toBeDefined();
   });
 
-  it('renders 7 fabric chips per region (4 × 7 = 28 total)', () => {
+  it('renders 9 fabric chips per region (4 × 9 = 36 total)', () => {
     render(<FabricPanel value={DEFAULT_VALUE} onChange={vi.fn()} />);
     const chips = screen.getAllByRole('button').filter((b) => b.hasAttribute('data-fabric'));
-    expect(chips).toHaveLength(28);
+    expect(chips).toHaveLength(36);
   });
 
-  it('all 7 FabricType values are present for the bodice region', () => {
+  it('all 9 FabricType values are present for the bodice region', () => {
     render(<FabricPanel value={DEFAULT_VALUE} onChange={vi.fn()} />);
     for (const fabric of ALL_FABRICS) {
       const chips = screen.getAllByRole('button').filter(
@@ -42,7 +42,7 @@ describe('FabricPanel', () => {
     const regions = ['bodice', 'skirt', 'sleeves', 'veil'];
     for (const region of regions) {
       const chips = screen.getAllByRole('button').filter((b) => b.getAttribute('data-region') === region);
-      expect(chips).toHaveLength(7);
+      expect(chips).toHaveLength(9);
     }
   });
 
@@ -109,5 +109,7 @@ describe('FabricPanel', () => {
     expect(screen.getAllByText('레이스')).toHaveLength(4);
     expect(screen.getAllByText('시폰')).toHaveLength(4);
     expect(screen.getAllByText('태피터')).toHaveLength(4);
+    expect(screen.getAllByText('굵은 비즈')).toHaveLength(4);
+    expect(screen.getAllByText('맑은 비즈')).toHaveLength(4);
   });
 });

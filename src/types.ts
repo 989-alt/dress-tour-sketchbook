@@ -65,7 +65,16 @@ export type SkirtTexture =
 export type SlitType = 'none' | 'side' | 'front';
 export type TrainLength = 'none' | 'sweep' | 'court' | 'chapel' | 'cathedral';
 
-export type FabricType = 'satin' | 'mikado' | 'organza' | 'tulle' | 'lace' | 'chiffon' | 'taffeta';
+export type FabricType =
+  | 'satin'
+  | 'mikado'
+  | 'organza'
+  | 'tulle'
+  | 'lace'
+  | 'chiffon'
+  | 'taffeta'
+  | 'chunkyBeading'
+  | 'delicateBeading';
 
 export type EmbellishmentType =
   | 'beads'

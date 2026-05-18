@@ -4,7 +4,7 @@ import { FABRIC_SHORT } from '../../lib/glossary';
 import { PreviewChip } from '../PreviewChip';
 import { previewUrl } from '../../lib/previewImages';
 
-const FABRIC_ORDER: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta'];
+const FABRIC_ORDER: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta', 'chunkyBeading', 'delicateBeading'];
 
 type FabricRegion = 'bodice' | 'skirt' | 'sleeves' | 'veil';
 

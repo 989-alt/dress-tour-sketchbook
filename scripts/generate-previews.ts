@@ -161,12 +161,14 @@ function trainPrompt(v: string): string {
 function fabricPrompt(v: string): string {
   const map: Record<string, string> = {
     satin: 'smooth glossy silk satin',
-    mikado: 'mikado silk — structured, matte, slightly heavy',
-    organza: 'crisp organza, slightly transparent with a subtle stiffness',
-    tulle: 'soft tulle — fine mesh, slightly fuzzy',
-    lace: 'detailed ivory lace with floral motifs',
-    chiffon: 'flowing chiffon — very light and soft drape',
-    taffeta: 'taffeta — slightly stiff with subtle sheen and rustle',
+    mikado: 'mikado silk — heavyweight, structured, matte with subtle natural sheen, holds dramatic shape (NOT shiny)',
+    organza: 'silk organza — crisp, sheer, lightly stiff with a translucent crystalline quality, faint glassy sheen at edges',
+    tulle: 'soft fine bridal tulle — fine mesh, slightly fuzzy, ethereal',
+    lace: 'detailed ivory bridal lace — intricate floral motifs, scalloped edges, semi-sheer cordage and small embroidered florals',
+    chiffon: 'silk chiffon — flowing, lightweight, slight crinkle texture, soft matte drape',
+    taffeta: 'silk taffeta — slightly stiff with subtle paper-like rustle, muted satin sheen',
+    chunkyBeading: 'heavy bridal couture beading — fabric densely encrusted with large crystals, baroque pearls, and dimensional rhinestones; chunky 3D sparkle covers the surface; refractive, luminous, statement-piece',
+    delicateBeading: 'all-over fine beading — tiny seed beads, small pearls, and micro crystals in delicate scattered patterns; subtle continuous shimmer; refined rather than flashy',
   };
   return `Macro fabric SWATCH close-up of ${map[v]} in ivory color. Square format (1:1). Fabric fills the frame. Top-down view. Plain background. Sharp focus, studio lighting. The fabric character must be unmistakable from texture alone.`;
 }
@@ -270,7 +272,7 @@ const tasks: Task[] = [
   ...(['sweep', 'court', 'chapel', 'cathedral'] as const)
     .map((v): Task => ({ category: 'train', value: v, prompt: trainPrompt(v) })),
 
-  ...(['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta'] as const)
+  ...(['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta', 'chunkyBeading', 'delicateBeading'] as const)
     .map((v): Task => ({ category: 'fabric', value: v, prompt: fabricPrompt(v) })),
 
   ...(['pureWhite', 'offWhite', 'ivory', 'champagne', 'blush', 'gold', 'grey', 'blue', 'black'] as const)

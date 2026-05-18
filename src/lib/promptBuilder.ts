@@ -139,14 +139,16 @@ const TRAIN: Record<TrainLength, string> = {
   cathedral: 'cathedral train (very long, ~2+ m flowing behind)',
 };
 
-const FABRIC: Record<FabricType, string> = {
-  satin: 'silk satin',
-  mikado: 'mikado silk (structured matte)',
-  organza: 'crisp organza',
-  tulle: 'soft tulle',
-  lace: 'lace',
-  chiffon: 'flowing chiffon',
-  taffeta: 'taffeta (slightly stiff with subtle sheen)',
+const FABRIC_DESC: Record<FabricType, string> = {
+  satin: 'silk satin — smooth, lustrous fabric with a strong glossy sheen on the right side and a subtle matte underside; drapes fluidly and clings to the body; reflects light in soft elongated highlights along the curves of the silhouette',
+  mikado: 'mikado silk — heavyweight Italian silk with a substantial, structured drape and a matte, subtly textured surface; holds dramatic A-line, ball-gown, or sculptural shapes without clinging; understated natural sheen, NOT shiny; reads as architectural and modern-bridal couture',
+  organza: 'silk organza — crisp, sheer, lightly stiff fabric with a translucent crystalline quality; holds volume and structure while remaining airy and weightless; faint glassy luster that catches light at the edges; often used for ethereal layered skirts, overlays, and dimensional sleeves',
+  tulle: 'fine bridal tulle — soft, lightweight netting with a delicate, slightly fuzzy texture; gathers into voluminous airy layers; matte and ethereal, with light passing through; characteristic of princess and ballerina silhouettes',
+  lace: 'detailed bridal lace with intricate floral motifs scalloped at the edges; allover delicate openwork pattern combining cordage and small embroidered florals; semi-sheer; either ivory chantilly or a denser Alençon-style lace with subtle re-embroidered raised motifs',
+  chiffon: 'silk chiffon — very lightweight, soft, and flowing fabric with a slight crinkle texture; drapes in delicate ripples and soft folds; matte with a whisper of sheen; airy and romantic, ideal for grecian or boho silhouettes',
+  taffeta: 'silk taffeta — crisp, slightly stiff fabric with a subtle paper-like rustle and a soft satiny sheen on the surface; holds bell-shaped volume and tailored pleats; the sheen is muted, NOT mirror-bright; classic vintage bridal fabric',
+  chunkyBeading: 'heavy couture bridal beading — fabric densely encrusted from top to hem with large hand-applied crystals, baroque pearls, and dimensional rhinestones; chunky 3D sparkle covers the surface so the underlying fabric is barely visible; refractive, luminous, statement-piece; reflects flashes of light dramatically with movement; this is THE dress, beading is the dress',
+  delicateBeading: 'all-over fine beading — fabric covered in tiny hand-applied seed beads, small freshwater pearls, and micro crystals in delicate scattered or sweeping patterns; subtle continuous shimmer that catches light gently rather than flashing; reads as refined and luminous rather than flashy; the base fabric texture remains visible through the beading',
 };
 
 const COLOR: Record<ColorEnum, string> = {
@@ -292,8 +294,7 @@ export function buildPrompt(entry: DressEntry, options: BuildPromptOptions): str
   const sleeveMat = entry.sleeve.material;
   const sleeveMatPhrase = SLEEVE_MATERIAL[sleeveMat];
   const sleevePhrase = SLEEVE[sleeveType];
-  const sleeveFabric = FABRIC[entry.fabric.sleeves];
-  lines.push(`- Sleeves: ${sleevePhrase} in ${sleeveMatPhrase}, ${sleeveFabric} fabric`);
+  lines.push(`- Sleeves: ${sleevePhrase} in ${sleeveMatPhrase}`);
 
   // Bodice
   const waistPos = WAIST_POSITION[entry.bodice.waistPosition];
@@ -321,9 +322,20 @@ export function buildPrompt(entry: DressEntry, options: BuildPromptOptions): str
   lines.push(skirtStr);
 
   // Fabric
-  const bodFabric = FABRIC[entry.fabric.bodice];
-  const skirtFabric = FABRIC[entry.fabric.skirt];
-  lines.push(`- Fabric: ${bodFabric} bodice and ${skirtFabric} skirt`);
+  const bodFabric = FABRIC_DESC[entry.fabric.bodice];
+  const skirtFabric = FABRIC_DESC[entry.fabric.skirt];
+  if (entry.fabric.bodice === entry.fabric.skirt) {
+    lines.push(`- Dress fabric: ${bodFabric}`);
+  } else {
+    lines.push(`- Bodice fabric: ${bodFabric}`);
+    lines.push(`- Skirt fabric: ${skirtFabric}`);
+  }
+  if (entry.sleeve.type !== 'sleeveless') {
+    lines.push(`- Sleeve fabric: ${FABRIC_DESC[entry.fabric.sleeves]}`);
+  }
+  if (entry.veil !== null) {
+    lines.push(`- Veil fabric: ${FABRIC_DESC[entry.fabric.veil]}`);
+  }
 
   // Color
   const primaryColor = COLOR[entry.color.primary];

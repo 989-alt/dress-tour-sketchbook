@@ -179,6 +179,69 @@ describe('buildPrompt — hasPreviousResult', () => {
   });
 });
 
+describe('buildPrompt — fabric descriptions', () => {
+  it('mikado bodice prompt contains "mikado silk" and "structured"', () => {
+    const entry = makeEntry({ fabric: { bodice: 'mikado', skirt: 'tulle', sleeves: 'satin', veil: 'tulle' } });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).toContain('mikado silk');
+    expect(prompt).toContain('structured');
+  });
+
+  it('mikado bodice prompt explicitly says NOT shiny', () => {
+    const entry = makeEntry({ fabric: { bodice: 'mikado', skirt: 'mikado', sleeves: 'satin', veil: 'tulle' } });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).toContain('NOT shiny');
+  });
+
+  it('chunkyBeading skirt prompt contains "chunky" and "couture"', () => {
+    const entry = makeEntry({ fabric: { bodice: 'satin', skirt: 'chunkyBeading', sleeves: 'satin', veil: 'tulle' } });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).toContain('chunky');
+    expect(prompt).toContain('couture');
+  });
+
+  it('delicateBeading bodice prompt contains "fine beading" and "seed beads"', () => {
+    const entry = makeEntry({ fabric: { bodice: 'delicateBeading', skirt: 'tulle', sleeves: 'satin', veil: 'tulle' } });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).toContain('fine beading');
+    expect(prompt).toContain('seed beads');
+  });
+
+  it('same bodice+skirt fabric uses single "Dress fabric:" line', () => {
+    const entry = makeEntry({ fabric: { bodice: 'satin', skirt: 'satin', sleeves: 'satin', veil: 'tulle' } });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).toContain('- Dress fabric:');
+    expect(prompt).not.toContain('- Bodice fabric:');
+    expect(prompt).not.toContain('- Skirt fabric:');
+  });
+
+  it('different bodice+skirt fabrics use separate "Bodice fabric:" and "Skirt fabric:" lines', () => {
+    const entry = makeEntry({ fabric: { bodice: 'mikado', skirt: 'tulle', sleeves: 'satin', veil: 'tulle' } });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).toContain('- Bodice fabric:');
+    expect(prompt).toContain('- Skirt fabric:');
+    expect(prompt).not.toContain('- Dress fabric:');
+  });
+
+  it('veil present: prompt includes "Veil fabric:" line', () => {
+    const entry = makeEntry({
+      fabric: { bodice: 'satin', skirt: 'satin', sleeves: 'satin', veil: 'tulle' },
+      veil: { length: 'fingertip', edge: 'cut', layers: 1 },
+    });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).toContain('- Veil fabric:');
+  });
+
+  it('null veil: prompt does not include "Veil fabric:" line', () => {
+    const entry = makeEntry({
+      fabric: { bodice: 'satin', skirt: 'satin', sleeves: 'satin', veil: 'tulle' },
+      veil: null,
+    });
+    const prompt = buildPrompt(entry, { hasReferenceDress: false });
+    expect(prompt).not.toContain('- Veil fabric:');
+  });
+});
+
 describe('buildPrompt — regionPrompts', () => {
   it('regionPrompts present: prompt mentions "REGION-SPECIFIC INSTRUCTIONS"', () => {
     const prompt = buildPrompt(makeEntry(), {

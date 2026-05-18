@@ -3,14 +3,14 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { FABRICS } from './index';
 import type { FabricType, ColorEnum } from '../../types';
 
-const ALL_FABRIC_TYPES: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta'];
+const ALL_FABRIC_TYPES: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta', 'chunkyBeading', 'delicateBeading'];
 
 describe('FABRICS record', () => {
-  it('has exactly 7 keys', () => {
-    expect(Object.keys(FABRICS)).toHaveLength(7);
+  it('has exactly 9 keys', () => {
+    expect(Object.keys(FABRICS)).toHaveLength(9);
   });
 
-  it('contains all 7 FabricType keys', () => {
+  it('contains all 9 FabricType keys', () => {
     for (const type of ALL_FABRIC_TYPES) {
       expect(FABRICS[type]).toBeDefined();
     }
@@ -24,17 +24,27 @@ describe('FABRICS record', () => {
 
   it('each def has a non-empty Korean label', () => {
     const expected: Record<FabricType, string> = {
-      satin:   '새틴',
-      mikado:  '미카도',
-      organza: '오간자',
-      tulle:   '튤',
-      lace:    '레이스',
-      chiffon: '시폰',
-      taffeta: '태피터',
+      satin:           '새틴',
+      mikado:          '미카도',
+      organza:         '오간자',
+      tulle:           '튤',
+      lace:            '레이스',
+      chiffon:         '시폰',
+      taffeta:         '태피터',
+      chunkyBeading:   '굵은 비즈',
+      delicateBeading: '맑은 비즈',
     };
     for (const type of ALL_FABRIC_TYPES) {
       expect(FABRICS[type].label).toBe(expected[type]);
     }
+  });
+
+  it('chunkyBeading has Korean label "굵은 비즈"', () => {
+    expect(FABRICS.chunkyBeading.label).toBe('굵은 비즈');
+  });
+
+  it('delicateBeading has Korean label "맑은 비즈"', () => {
+    expect(FABRICS.delicateBeading.label).toBe('맑은 비즈');
   });
 });
 
@@ -105,5 +115,29 @@ describe('FabricDef.renderDef', () => {
   it('idPrefix is incorporated into the def id', () => {
     const html = renderToStaticMarkup(FABRICS.satin.renderDef({ idPrefix: 'px-', color, colorHex }));
     expect(html).toContain('id="px-fabric-satin-blush"');
+  });
+
+  it('chunkyBeading: produces a pattern element with multiple circles', () => {
+    const html = renderToStaticMarkup(FABRICS.chunkyBeading.renderDef({ idPrefix, color, colorHex }));
+    expect(html).toContain('<pattern');
+    expect(html).toContain('<circle');
+    const circleCount = (html.match(/<circle/g) ?? []).length;
+    expect(circleCount).toBeGreaterThanOrEqual(4);
+  });
+
+  it('chunkyBeading: id contains type and color', () => {
+    const html = renderToStaticMarkup(FABRICS.chunkyBeading.renderDef({ idPrefix, color, colorHex }));
+    expect(html).toContain(`id="${idPrefix}fabric-chunkyBeading-${color}"`);
+  });
+
+  it('delicateBeading: produces a pattern element with circles', () => {
+    const html = renderToStaticMarkup(FABRICS.delicateBeading.renderDef({ idPrefix, color, colorHex }));
+    expect(html).toContain('<pattern');
+    expect(html).toContain('<circle');
+  });
+
+  it('delicateBeading: id contains type and color', () => {
+    const html = renderToStaticMarkup(FABRICS.delicateBeading.renderDef({ idPrefix, color, colorHex }));
+    expect(html).toContain(`id="${idPrefix}fabric-delicateBeading-${color}"`);
   });
 });

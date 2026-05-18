@@ -129,6 +129,8 @@ export const FABRIC_GLOSSARY: Record<FabricType, string> = {
   lace: '레이스: 섬세한 패턴의 소재. 로맨틱하고 클래식한 웨딩 드레스의 전통적인 소재.',
   chiffon: '시폰: 얇고 부드러운 반투명 소재. 흘러내리는 드레이프가 아름답고 보헤미안한 느낌.',
   taffeta: '태피타: 바스락거리는 질감의 소재. 볼륨감과 구조감이 있으며 빈티지한 느낌.',
+  chunkyBeading: '드레스 전체에 큰 크리스털·진주·스톤이 손으로 박힌 화려한 비즈 원단. 입체감이 강하고 빛을 많이 반사하여 결혼식장 조명 아래서 또렷이 빛납니다.',
+  delicateBeading: '아주 작은 시드비즈와 진주가 정교하게 박혀 잔잔하게 반짝이는 원단. 가까이서 보면 디테일이 살아있고, 멀리서는 부드러운 광택만 도는 우아한 느낌.',
 };
 
 export const EMBELLISHMENT_GLOSSARY: Record<EmbellishmentType, string> = {
@@ -288,6 +290,8 @@ export const FABRIC_SHORT: Record<FabricType, string> = {
   lace: '섬세한 패턴의 소재',
   chiffon: '얇고 부드러운 반투명',
   taffeta: '바스락거리는 질감',
+  chunkyBeading: '굵은 비즈가 빽빽이',
+  delicateBeading: '미세 비즈 잔잔히',
 };
 
 export const COLOR_SHORT: Record<ColorEnum, string> = {
