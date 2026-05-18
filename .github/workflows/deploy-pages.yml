@@ -1,4 +1,12 @@
-name: Deploy to GitHub Pages
+# GitHub Pages 배포 워크플로
+#
+# ⚠️  이 워크플로는 정적 자산(SVG/UI)만 배포합니다.
+#     AI 합성 기능(/api/generate 서버리스 함수)은 GitHub Pages에서 작동하지 않습니다.
+#     AI 기능을 포함한 전체 기능은 Vercel 배포를 사용하세요.
+#
+# URL: https://989-alt.github.io/dress-tour-sketchbook/
+
+name: Deploy to GitHub Pages (UI only — AI requires Vercel)
 
 on:
   push:
