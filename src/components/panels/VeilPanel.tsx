@@ -1,6 +1,8 @@
 import type { VeilLength, VeilEdge } from '../../types';
 import { VEIL_LENGTHS, VEIL_LENGTH_ORDER, VEIL_EDGES, VEIL_EDGE_ORDER } from '../../parts/veils';
-import { VEIL_LENGTH_GLOSSARY, VEIL_EDGE_GLOSSARY } from '../../lib/glossary';
+import { VEIL_LENGTH_SHORT, VEIL_EDGE_SHORT } from '../../lib/glossary';
+import { PreviewChip } from '../PreviewChip';
+import { previewUrl } from '../../lib/previewImages';
 
 interface VeilPanelProps {
   value: { length: VeilLength; edge: VeilEdge; layers: 1 | 2 } | null;
@@ -43,17 +45,17 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
       {/* Length */}
       <div>
         <p className="text-xs font-semibold text-gray-600 mb-1">길이</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {VEIL_LENGTH_ORDER.map((l) => (
-            <button
+            <PreviewChip
               key={l}
-              data-veil-length={l}
+              selected={length === l}
               onClick={() => setLength(l)}
-              title={VEIL_LENGTH_GLOSSARY[l]}
-              className={chip(length === l)}
-            >
-              {VEIL_LENGTHS[l].label}
-            </button>
+              label={VEIL_LENGTHS[l].label}
+              description={VEIL_LENGTH_SHORT[l]}
+              previewSrc={previewUrl('veilLength', l)}
+              dataAttrs={{ 'data-veil-length': l }}
+            />
           ))}
         </div>
       </div>
@@ -62,17 +64,17 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
       {hasVeil && (
         <div>
           <p className="text-xs font-semibold text-gray-600 mb-1">가장자리</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {VEIL_EDGE_ORDER.map((e) => (
-              <button
+              <PreviewChip
                 key={e}
-                data-veil-edge={e}
+                selected={edge === e}
                 onClick={() => setEdge(e)}
-                title={VEIL_EDGE_GLOSSARY[e]}
-                className={chip(edge === e)}
-              >
-                {VEIL_EDGES[e].label}
-              </button>
+                label={VEIL_EDGES[e].label}
+                description={VEIL_EDGE_SHORT[e]}
+                previewSrc={previewUrl('veilEdge', e)}
+                dataAttrs={{ 'data-veil-edge': e }}
+              />
             ))}
           </div>
         </div>
@@ -84,6 +86,7 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
           <p className="text-xs font-semibold text-gray-600 mb-1">레이어</p>
           <div className="flex gap-2">
             <button
+              type="button"
               data-veil-layers={1}
               onClick={() => setLayers(1)}
               className={chip(layers === 1)}
@@ -91,6 +94,7 @@ export function VeilPanel({ value, onChange }: VeilPanelProps) {
               단일
             </button>
             <button
+              type="button"
               data-veil-layers={2}
               onClick={() => setLayers(2)}
               className={chip(layers === 2)}

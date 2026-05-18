@@ -15,6 +15,23 @@ import {
   VEIL_LENGTH_GLOSSARY,
   VEIL_EDGE_GLOSSARY,
   ACCESSORY_GLOSSARY,
+  SILHOUETTE_SHORT,
+  NECKLINE_SHORT,
+  SLEEVE_SHORT,
+  SLEEVE_MATERIAL_SHORT,
+  WAIST_POSITION_SHORT,
+  BODICE_STRUCTURE_SHORT,
+  WAIST_ACCENT_SHORT,
+  BACK_SHORT,
+  SKIRT_TEXTURE_SHORT,
+  SLIT_SHORT,
+  TRAIN_SHORT,
+  FABRIC_SHORT,
+  COLOR_SHORT,
+  EMBELLISHMENT_SHORT,
+  VEIL_LENGTH_SHORT,
+  VEIL_EDGE_SHORT,
+  ACCESSORY_SHORT,
 } from './glossary';
 
 // All enum values from types.ts — checked manually against types.ts
@@ -65,3 +82,42 @@ allPresent(EMBELLISHMENT_GLOSSARY, EMBELLISHMENT_TYPES, 'EMBELLISHMENT_GLOSSARY'
 allPresent(VEIL_LENGTH_GLOSSARY, VEIL_LENGTHS, 'VEIL_LENGTH_GLOSSARY');
 allPresent(VEIL_EDGE_GLOSSARY, VEIL_EDGES, 'VEIL_EDGE_GLOSSARY');
 allPresent(ACCESSORY_GLOSSARY, ACCESSORY_TYPES, 'ACCESSORY_GLOSSARY');
+
+// ── SHORT record coverage ─────────────────────────────────────────────────────
+const SLIT_TYPES = ['none', 'side', 'front'] as const;
+const COLOR_TYPES = ['pureWhite', 'offWhite', 'ivory', 'champagne', 'blush', 'gold', 'grey', 'blue', 'black'] as const;
+
+/** Like allPresent but only requires length > 1 — SHORT values can be very brief. */
+function allShortPresent<T extends string>(glossary: Record<T, string>, keys: readonly T[], name: string) {
+  describe(name, () => {
+    it(`has ${keys.length} entries`, () => {
+      expect(Object.keys(glossary)).toHaveLength(keys.length);
+    });
+
+    for (const key of keys) {
+      it(`has non-empty entry for "${key}"`, () => {
+        expect(glossary[key]).toBeTruthy();
+        expect(typeof glossary[key]).toBe('string');
+        expect(glossary[key].length).toBeGreaterThan(1);
+      });
+    }
+  });
+}
+
+allShortPresent(SILHOUETTE_SHORT, SILHOUETTE_TYPES, 'SILHOUETTE_SHORT');
+allShortPresent(NECKLINE_SHORT, NECKLINE_TYPES, 'NECKLINE_SHORT');
+allShortPresent(SLEEVE_SHORT, SLEEVE_TYPES, 'SLEEVE_SHORT');
+allShortPresent(SLEEVE_MATERIAL_SHORT, SLEEVE_MATERIALS, 'SLEEVE_MATERIAL_SHORT');
+allShortPresent(WAIST_POSITION_SHORT, WAIST_POSITIONS, 'WAIST_POSITION_SHORT');
+allShortPresent(BODICE_STRUCTURE_SHORT, BODICE_STRUCTURES, 'BODICE_STRUCTURE_SHORT');
+allShortPresent(WAIST_ACCENT_SHORT, WAIST_ACCENTS, 'WAIST_ACCENT_SHORT');
+allShortPresent(BACK_SHORT, BACK_TYPES, 'BACK_SHORT');
+allShortPresent(SKIRT_TEXTURE_SHORT, SKIRT_TEXTURES, 'SKIRT_TEXTURE_SHORT');
+allShortPresent(SLIT_SHORT, SLIT_TYPES, 'SLIT_SHORT');
+allShortPresent(TRAIN_SHORT, TRAIN_LENGTHS, 'TRAIN_SHORT');
+allShortPresent(FABRIC_SHORT, FABRIC_TYPES, 'FABRIC_SHORT');
+allShortPresent(COLOR_SHORT, COLOR_TYPES, 'COLOR_SHORT');
+allShortPresent(EMBELLISHMENT_SHORT, EMBELLISHMENT_TYPES, 'EMBELLISHMENT_SHORT');
+allShortPresent(VEIL_LENGTH_SHORT, VEIL_LENGTHS, 'VEIL_LENGTH_SHORT');
+allShortPresent(VEIL_EDGE_SHORT, VEIL_EDGES, 'VEIL_EDGE_SHORT');
+allShortPresent(ACCESSORY_SHORT, ACCESSORY_TYPES, 'ACCESSORY_SHORT');

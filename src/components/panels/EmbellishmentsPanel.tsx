@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { Embellishment, EmbellishmentType, Region, ColorEnum } from '../../types';
 import { EMBELLISHMENTS } from '../../parts/embellishments';
-import { EMBELLISHMENT_GLOSSARY } from '../../lib/glossary';
+import { EMBELLISHMENT_SHORT } from '../../lib/glossary';
+import { PreviewChip } from '../PreviewChip';
+import { previewUrl } from '../../lib/previewImages';
 
 const TYPE_ORDER: EmbellishmentType[] = [
   'beads', 'laceApplique', 'threeDFlorals', 'crystals', 'pearls',
@@ -53,6 +55,7 @@ function ExtraControls({
         {sizes.map((s) => (
           <button
             key={s}
+            type="button"
             data-size={s}
             onClick={() => onExtraChange({ ...extra, size: s })}
             className={chip(extra.size === s || (!extra.size && s === 'M'))}
@@ -76,6 +79,7 @@ function ExtraControls({
         {styles.map(({ key, label }) => (
           <button
             key={key}
+            type="button"
             data-style={key}
             onClick={() => onExtraChange({ ...extra, style: key })}
             className={chip(extra.style === key || (!extra.style && key === 'floral'))}
@@ -101,6 +105,7 @@ function ExtraControls({
           {placements.map(({ key, label }) => (
             <button
               key={key}
+              type="button"
               data-placement={key}
               onClick={() => onExtraChange({ ...extra, placement: key })}
               className={chip(extra.placement === key || (!extra.placement && key === 'waist'))}
@@ -114,6 +119,7 @@ function ExtraControls({
           {[0, 1, 2, 3].map((n) => (
             <button
               key={n}
+              type="button"
               data-ribbon-count={n}
               onClick={() => onExtraChange({ ...extra, count: n })}
               className={chip((extra.count ?? 1) === n)}
@@ -134,6 +140,7 @@ function ExtraControls({
           {[{ key: 'front', label: '앞' }, { key: 'back', label: '뒤' }].map(({ key, label }) => (
             <button
               key={key}
+              type="button"
               data-side={key}
               onClick={() => onExtraChange({ ...extra, side: key })}
               className={chip(extra.side === key || (!extra.side && key === 'front'))}
@@ -147,6 +154,7 @@ function ExtraControls({
           {[3, 5, 8, 10, 15, 20].map((n) => (
             <button
               key={n}
+              type="button"
               data-button-count={n}
               onClick={() => onExtraChange({ ...extra, count: n })}
               className={chip((extra.count ?? 5) === n)}
@@ -188,6 +196,7 @@ export function EmbellishmentsPanel({ value, onChange }: EmbellishmentsPanelProp
         <p className="text-xs font-semibold text-gray-700">장식</p>
         {!adding && (
           <button
+            type="button"
             data-action="add-embellishment"
             onClick={() => setAdding(true)}
             className="text-xs px-2 py-1 rounded border border-blue-400 text-blue-600 hover:bg-blue-50"
@@ -201,17 +210,17 @@ export function EmbellishmentsPanel({ value, onChange }: EmbellishmentsPanelProp
       {adding && (
         <div className="border border-gray-200 rounded p-2 flex flex-col gap-2 bg-gray-50">
           <p className="text-xs font-semibold text-gray-600">종류 선택</p>
-          <div className="flex flex-wrap gap-1">
+          <div className="grid grid-cols-3 gap-2">
             {TYPE_ORDER.map((t) => (
-              <button
+              <PreviewChip
                 key={t}
-                data-add-type={t}
+                selected={addType === t}
                 onClick={() => setAddType(t)}
-                title={EMBELLISHMENT_GLOSSARY[t]}
-                className={chip(addType === t)}
-              >
-                {EMBELLISHMENTS[t].label}
-              </button>
+                label={EMBELLISHMENTS[t].label}
+                description={EMBELLISHMENT_SHORT[t]}
+                previewSrc={previewUrl('embellishment', t)}
+                dataAttrs={{ 'data-add-type': t }}
+              />
             ))}
           </div>
           {addType && (
@@ -221,6 +230,7 @@ export function EmbellishmentsPanel({ value, onChange }: EmbellishmentsPanelProp
                 {REGIONS.map((r) => (
                   <button
                     key={r}
+                    type="button"
                     data-add-region={r}
                     onClick={() => confirmAdd(r)}
                     className={chip(false)}
@@ -232,6 +242,7 @@ export function EmbellishmentsPanel({ value, onChange }: EmbellishmentsPanelProp
             </>
           )}
           <button
+            type="button"
             data-action="cancel-add"
             onClick={() => { setAdding(false); setAddType(null); }}
             className="text-xs text-gray-400 hover:text-gray-600 self-end"
@@ -267,6 +278,7 @@ export function EmbellishmentsPanel({ value, onChange }: EmbellishmentsPanelProp
             <div className="flex-1" />
             {/* Delete */}
             <button
+              type="button"
               data-delete={idx}
               onClick={() => deleteAt(idx)}
               className="text-xs text-red-400 hover:text-red-600"
@@ -282,6 +294,7 @@ export function EmbellishmentsPanel({ value, onChange }: EmbellishmentsPanelProp
             {INTENSITIES.map((n) => (
               <button
                 key={n}
+                type="button"
                 data-intensity={n}
                 onClick={() => updateAt(idx, { intensity: n })}
                 className={chip(emb.intensity === n)}

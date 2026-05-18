@@ -1,6 +1,8 @@
 import type { SilhouetteType } from '../../types';
 import { SILHOUETTES } from '../../parts/silhouettes';
-import { SILHOUETTE_GLOSSARY } from '../../lib/glossary';
+import { SILHOUETTE_SHORT } from '../../lib/glossary';
+import { PreviewChip } from '../PreviewChip';
+import { previewUrl } from '../../lib/previewImages';
 
 const SILHOUETTE_LABELS: Record<SilhouetteType, string> = {
   aline: 'A-라인',
@@ -30,28 +32,20 @@ export function SilhouettePanel({ value, onChange }: SilhouettePanelProps) {
         const def = SILHOUETTES[type];
         const selected = type === value;
         return (
-          <button
+          <PreviewChip
             key={type}
+            selected={selected}
             onClick={() => onChange(type)}
-            data-silhouette={type}
-            title={SILHOUETTE_GLOSSARY[type]}
-            className={[
-              'flex flex-col items-center gap-1 p-2 rounded border transition-colors',
-              selected
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:bg-gray-50',
-            ].join(' ')}
-          >
-            <svg
-              viewBox="0 0 400 800"
-              width={36}
-              height={72}
-              aria-hidden
-            >
-              <path d={def.bodyPath} fill={selected ? '#93c5fd' : '#d1d5db'} />
-            </svg>
-            <span className="text-xs text-gray-700">{SILHOUETTE_LABELS[type]}</span>
-          </button>
+            label={SILHOUETTE_LABELS[type]}
+            description={SILHOUETTE_SHORT[type]}
+            previewSrc={previewUrl('silhouette', type)}
+            svgFallback={
+              <svg viewBox="0 0 400 800" width={36} height={72} aria-hidden>
+                <path d={def.bodyPath} fill={selected ? '#93c5fd' : '#d1d5db'} />
+              </svg>
+            }
+            dataAttrs={{ 'data-silhouette': type }}
+          />
         );
       })}
     </div>

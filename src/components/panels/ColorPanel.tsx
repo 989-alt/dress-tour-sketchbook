@@ -1,5 +1,6 @@
 import type { ColorEnum } from '../../types';
 import { COLOR_HEX, COLOR_LABELS } from '../../lib/colorPalette';
+import { COLOR_SHORT } from '../../lib/glossary';
 
 const COLOR_ORDER: ColorEnum[] = [
   'pureWhite', 'offWhite', 'ivory', 'champagne', 'blush',
@@ -24,26 +25,56 @@ interface SwatchRowProps {
   onSelect: (c: ColorEnum) => void;
 }
 
+function ColorSwatch({
+  color,
+  selected,
+  section,
+  onSelect,
+}: {
+  color: ColorEnum;
+  selected: boolean;
+  section: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      data-section={section}
+      data-color={color}
+      onClick={onSelect}
+      className="flex flex-col items-center gap-0.5 p-1 rounded border transition-colors text-center"
+      style={{
+        borderColor: selected ? '#3b82f6' : '#d1d5db',
+        backgroundColor: selected ? '#eff6ff' : 'transparent',
+      }}
+    >
+      <div
+        className="w-7 h-7 rounded-full border border-gray-200"
+        style={{ backgroundColor: COLOR_HEX[color] }}
+        aria-label={COLOR_LABELS[color]}
+      />
+      <span className="text-xs text-gray-700 leading-tight" style={{ fontSize: '10px' }}>
+        {COLOR_LABELS[color]}
+      </span>
+      <span className="text-gray-400 leading-tight" style={{ fontSize: '9px' }}>
+        {COLOR_SHORT[color]}
+      </span>
+    </button>
+  );
+}
+
 function SwatchRow({ selected, 'data-section': section, onSelect }: SwatchRowProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {COLOR_ORDER.map((color) => {
-        const isSelected = color === selected;
-        return (
-          <button
-            key={color}
-            data-section={section}
-            data-color={color}
-            title={COLOR_LABELS[color]}
-            onClick={() => onSelect(color)}
-            className={[
-              'w-7 h-7 rounded-full border-2 transition-colors',
-              isSelected ? 'border-blue-500 ring-1 ring-blue-400' : 'border-gray-300',
-            ].join(' ')}
-            style={{ backgroundColor: COLOR_HEX[color] }}
-          />
-        );
-      })}
+      {COLOR_ORDER.map((color) => (
+        <ColorSwatch
+          key={color}
+          color={color}
+          selected={color === selected}
+          section={section}
+          onSelect={() => onSelect(color)}
+        />
+      ))}
     </div>
   );
 }
@@ -88,6 +119,7 @@ export function ColorPanel({ value, onChange }: ColorPanelProps) {
           {(['solid', 'ombre'] as const).map((g) => (
             <button
               key={g}
+              type="button"
               data-gradient={g}
               onClick={() => setGradient(g)}
               className={[

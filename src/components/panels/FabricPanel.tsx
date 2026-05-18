@@ -1,6 +1,8 @@
 import type { FabricType } from '../../types';
 import { FABRICS } from '../../parts/fabrics';
-import { FABRIC_GLOSSARY } from '../../lib/glossary';
+import { FABRIC_SHORT } from '../../lib/glossary';
+import { PreviewChip } from '../PreviewChip';
+import { previewUrl } from '../../lib/previewImages';
 
 const FABRIC_ORDER: FabricType[] = ['satin', 'mikado', 'organza', 'tulle', 'lace', 'chiffon', 'taffeta'];
 
@@ -27,6 +29,29 @@ interface FabricPanelProps {
   onChange: (next: FabricValue) => void;
 }
 
+function FabricChip({
+  fabric,
+  region,
+  selected,
+  onSelect,
+}: {
+  fabric: FabricType;
+  region: FabricRegion;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <PreviewChip
+      selected={selected}
+      onClick={onSelect}
+      label={FABRICS[fabric].label}
+      description={FABRIC_SHORT[fabric]}
+      previewSrc={previewUrl('fabric', fabric)}
+      dataAttrs={{ 'data-region': region, 'data-fabric': fabric }}
+    />
+  );
+}
+
 export function FabricPanel({ value, onChange }: FabricPanelProps) {
   function setFabric(region: FabricRegion, fabric: FabricType) {
     onChange({ ...value, [region]: fabric });
@@ -37,27 +62,16 @@ export function FabricPanel({ value, onChange }: FabricPanelProps) {
       {REGION_ORDER.map((region) => (
         <div key={region}>
           <p className="text-xs font-semibold text-gray-600 mb-1">{REGION_LABELS[region]}</p>
-          <div className="flex flex-wrap gap-2">
-            {FABRIC_ORDER.map((fabric) => {
-              const selected = fabric === value[region];
-              return (
-                <button
-                  key={fabric}
-                  data-region={region}
-                  data-fabric={fabric}
-                  onClick={() => setFabric(region, fabric)}
-                  title={FABRIC_GLOSSARY[fabric]}
-                  className={[
-                    'px-2 py-1 rounded border text-xs transition-colors',
-                    selected
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-                  ].join(' ')}
-                >
-                  {FABRICS[fabric].label}
-                </button>
-              );
-            })}
+          <div className="grid grid-cols-4 gap-1">
+            {FABRIC_ORDER.map((fabric) => (
+              <FabricChip
+                key={fabric}
+                fabric={fabric}
+                region={region}
+                selected={fabric === value[region]}
+                onSelect={() => setFabric(region, fabric)}
+              />
+            ))}
           </div>
         </div>
       ))}

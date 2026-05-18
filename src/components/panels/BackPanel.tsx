@@ -1,6 +1,8 @@
 import type { BackType } from '../../types';
 import { BACKS } from '../../parts/backs';
-import { BACK_GLOSSARY } from '../../lib/glossary';
+import { BACK_SHORT } from '../../lib/glossary';
+import { PreviewChip } from '../PreviewChip';
+import { previewUrl } from '../../lib/previewImages';
 
 const BACK_ORDER: BackType[] = [
   'closed', 'vBack', 'illusionBack', 'openBack',
@@ -27,22 +29,17 @@ export function BackPanel({ value, onChange }: BackPanelProps) {
     <div className="flex flex-col gap-4">
       <div>
         <p className="text-xs font-semibold text-gray-600 mb-1">등판 스타일</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {BACK_ORDER.map((bt) => (
-            <button
+            <PreviewChip
               key={bt}
-              data-back-type={bt}
+              selected={bt === value.type}
               onClick={() => setType(bt)}
-              title={BACK_GLOSSARY[bt]}
-              className={[
-                'px-2 py-1 rounded border text-xs transition-colors',
-                bt === value.type
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-              ].join(' ')}
-            >
-              {BACKS[bt].label}
-            </button>
+              label={BACKS[bt].label}
+              description={BACK_SHORT[bt]}
+              previewSrc={previewUrl('back', bt)}
+              dataAttrs={{ 'data-back-type': bt }}
+            />
           ))}
         </div>
       </div>
@@ -54,6 +51,7 @@ export function BackPanel({ value, onChange }: BackPanelProps) {
             {DEPTH_VALUES.map((d) => (
               <button
                 key={d}
+                type="button"
                 data-open-depth={d}
                 onClick={() => setDepth(d)}
                 className={[

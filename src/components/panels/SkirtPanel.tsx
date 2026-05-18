@@ -1,6 +1,8 @@
 import type { SkirtTexture, SlitType, TrainLength } from '../../types';
 import { TEXTURES } from '../../parts/skirts';
-import { SKIRT_TEXTURE_GLOSSARY, TRAIN_GLOSSARY } from '../../lib/glossary';
+import { SKIRT_TEXTURE_SHORT, SLIT_SHORT, TRAIN_SHORT } from '../../lib/glossary';
+import { PreviewChip } from '../PreviewChip';
+import { previewUrl } from '../../lib/previewImages';
 
 const TEXTURE_ORDER: SkirtTexture[] = [
   'smooth', 'gathered', 'pleated', 'tiered',
@@ -36,31 +38,32 @@ interface SkirtPanelProps {
   onChange: (next: SkirtValue) => void;
 }
 
-export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
-  const chip = (active: boolean) =>
-    [
-      'px-2 py-1 rounded border text-xs transition-colors',
-      active
-        ? 'border-blue-500 bg-blue-50 text-blue-700'
-        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-    ].join(' ');
+function numericChip(active: boolean) {
+  return [
+    'px-2 py-1 rounded border text-xs transition-colors',
+    active
+      ? 'border-blue-500 bg-blue-50 text-blue-700'
+      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+  ].join(' ');
+}
 
+export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Texture */}
       <div>
         <p className="text-xs font-semibold text-gray-600 mb-1">텍스처</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {TEXTURE_ORDER.map((t) => (
-            <button
+            <PreviewChip
               key={t}
-              data-texture={t}
+              selected={t === value.texture}
               onClick={() => onChange({ ...value, texture: t })}
-              title={SKIRT_TEXTURE_GLOSSARY[t]}
-              className={chip(t === value.texture)}
-            >
-              {TEXTURES[t].label}
-            </button>
+              label={TEXTURES[t].label}
+              description={SKIRT_TEXTURE_SHORT[t]}
+              previewSrc={previewUrl('skirtTexture', t)}
+              dataAttrs={{ 'data-texture': t }}
+            />
           ))}
         </div>
       </div>
@@ -73,9 +76,10 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
             {LAYER_VALUES.map((n) => (
               <button
                 key={n}
+                type="button"
                 data-layers={n}
                 onClick={() => onChange({ ...value, layers: n })}
-                className={chip(n === value.layers)}
+                className={numericChip(n === value.layers)}
               >
                 {n}
               </button>
@@ -87,16 +91,17 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
       {/* Slit */}
       <div>
         <p className="text-xs font-semibold text-gray-600 mb-1">슬릿</p>
-        <div className="flex gap-2 mb-2">
+        <div className="grid grid-cols-3 gap-2 mb-2">
           {SLIT_TYPES.map(({ key, label }) => (
-            <button
+            <PreviewChip
               key={key}
-              data-slit-type={key}
+              selected={key === value.slit.type}
               onClick={() => onChange({ ...value, slit: { ...value.slit, type: key } })}
-              className={chip(key === value.slit.type)}
-            >
-              {label}
-            </button>
+              label={label}
+              description={SLIT_SHORT[key]}
+              previewSrc={previewUrl('slit', key)}
+              dataAttrs={{ 'data-slit-type': key }}
+            />
           ))}
         </div>
         <p className="text-xs text-gray-500 mb-1">높이</p>
@@ -104,9 +109,10 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
           {HEIGHT_VALUES.map((h) => (
             <button
               key={h}
+              type="button"
               data-slit-height={h}
               onClick={() => onChange({ ...value, slit: { ...value.slit, height: h } })}
-              className={chip(h === value.slit.height)}
+              className={numericChip(h === value.slit.height)}
             >
               {h}
             </button>
@@ -117,17 +123,17 @@ export function SkirtPanel({ value, onChange }: SkirtPanelProps) {
       {/* Train */}
       <div>
         <p className="text-xs font-semibold text-gray-600 mb-1">트레인</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {TRAIN_ORDER.map(({ key, label }) => (
-            <button
+            <PreviewChip
               key={key}
-              data-train={key}
+              selected={key === value.train}
               onClick={() => onChange({ ...value, train: key })}
-              title={TRAIN_GLOSSARY[key]}
-              className={chip(key === value.train)}
-            >
-              {label}
-            </button>
+              label={label}
+              description={TRAIN_SHORT[key]}
+              previewSrc={previewUrl('train', key)}
+              dataAttrs={{ 'data-train': key }}
+            />
           ))}
         </div>
       </div>

@@ -8,8 +8,10 @@ import type {
   WaistAccent,
   BackType,
   SkirtTexture,
+  SlitType,
   TrainLength,
   FabricType,
+  ColorEnum,
   EmbellishmentType,
   VeilLength,
   VeilEdge,
@@ -165,4 +167,175 @@ export const ACCESSORY_GLOSSARY: Record<AccessoryType, string> = {
   hairVine: '헤어 바인: 넝쿨처럼 생긴 유연한 헤어 액세서리. 보헤미안하고 자연스러운 느낌.',
   hairComb: '헤어 콤: 머리에 꽂는 빗 모양의 장식. 심플하고 우아한 포인트.',
   floralCrown: '플로럴 크라운: 꽃으로 만든 화관. 자연스럽고 낭만적인 느낌. 야외 웨딩에 잘 어울림.',
+};
+
+// ── Short (≤25 chars) Korean descriptions for always-visible chip labels ──────
+
+export const SILHOUETTE_SHORT: Record<SilhouetteType, string> = {
+  aline: '어깨부터 직선, 허리 아래로 퍼짐',
+  mermaid: '무릎까지 fit, 무릎부터 크게 퍼짐',
+  trumpet: '허벅지 중간까지 fit, 부드럽게 퍼짐',
+  princess: '허리부터 자연스럽게 퍼짐',
+  sheath: '직선 컬럼, 좁고 매끈',
+  empire: '가슴 아래 절개, 흘러내림',
+  fitFlare: '허리까지 fit, 살짝 퍼짐',
+  tealength: '종아리 중간 길이 A라인',
+  mini: '무릎 위 짧은 길이',
+};
+
+export const NECKLINE_SHORT: Record<NecklineType, string> = {
+  sweetheart: '하트 모양 가슴 라인',
+  vRegular: '보통 깊이 V',
+  vDeep: '깊은 V',
+  vPlunging: '매우 깊은 V (가슴 아래까지)',
+  halter: '뒤로 묶는 끈, 어깨 노출',
+  offShoulder: '어깨 살짝 아래',
+  oneShoulder: '한쪽 어깨만',
+  strapless: '끈 없음, 가슴 일자',
+  boat: '쇄골 위 가로 라인',
+  illusionCrew: '시스루로 목까지',
+  square: '사각형',
+  scoop: '둥근 U자',
+  portrait: '어깨 양쪽 가로 넓게',
+  highNeck: '목까지 올라옴',
+  keyhole: '가슴 중앙에 열린 슬롯',
+};
+
+export const SLEEVE_SHORT: Record<SleeveType, string> = {
+  sleeveless: '소매 없음',
+  cap: '어깨 살짝 덮는 짧은 소매',
+  short: '팔꿈치 위 짧은 소매',
+  threeQuarter: '팔꿈치와 손목 사이 길이',
+  long: '손목까지 긴 소매',
+  bishop: '손목에서 퍼프, 커프스로 좁아짐',
+  puff: '어깨 부분 부풀어 오름',
+  bell: '종 모양으로 넓게 퍼짐',
+  legOfMutton: '어깨 부풀고 팔꿈치 아래 타이트',
+  illusion: '시스루 소재, 피부 비침',
+};
+
+export const SLEEVE_MATERIAL_SHORT: Record<SleeveMaterial, string> = {
+  opaque: '불투명 소재',
+  sheer: '반투명 시폰·오간자',
+  lace: '레이스 소재',
+  beaded: '비즈 장식',
+};
+
+export const WAIST_POSITION_SHORT: Record<WaistPosition, string> = {
+  natural: '실제 허리선 위치',
+  empire: '가슴 바로 아래 높은 위치',
+  basque: 'V자로 앞쪽이 뾰족하게 내려옴',
+  drop: '엉덩이 쪽으로 낮게 내려옴',
+  asymmetric: '한쪽으로 기울어진 비대칭',
+};
+
+export const BODICE_STRUCTURE_SHORT: Record<BodiceStructure, string> = {
+  corset: '강하게 조이는 구조적 보디스',
+  softFit: '부드럽게 몸에 맞는 형태',
+  peplum: '허리 아래 작은 플레어 러플',
+  mockPeplum: '페플럼 효과, 별도 레이어 없음',
+};
+
+export const WAIST_ACCENT_SHORT: Record<WaistAccent, string> = {
+  none: '허리 장식 없음',
+  sash: '허리 두르는 넓은 띠',
+  ribbon: '허리에 묶는 리본',
+  brooch: '허리 포인트 장식 핀',
+  beadedBand: '비즈 장식 허리 밴드',
+};
+
+export const BACK_SHORT: Record<BackType, string> = {
+  closed: '등 전체 덮임',
+  vBack: '등쪽 V자 파임',
+  illusionBack: '시스루로 등 비침',
+  openBack: '등이 크게 드러남',
+  keyhole: '열쇠구멍 형태 개방부',
+  buttonRow: '등 중앙에 버튼 줄',
+  laceUpCorset: '끈으로 조여 맬 수 있음',
+  drape: '등에 부드럽게 흘러내리는 드레이프',
+};
+
+export const SKIRT_TEXTURE_SHORT: Record<SkirtTexture, string> = {
+  smooth: '매끈한 표면',
+  gathered: '주름 모아 볼륨 만들기',
+  pleated: '규칙적인 주름',
+  tiered: '여러 층 계단식',
+  layeredTulle: '여러 겹 튤 레이어',
+  ruffled: '물결치는 러플 장식',
+  ruched: '당겨서 만든 주름 장식',
+  asymmetricDrape: '비대칭으로 흘러내림',
+};
+
+export const SLIT_SHORT: Record<SlitType, string> = {
+  none: '슬릿 없음',
+  side: '옆면 슬릿',
+  front: '앞면 슬릿',
+};
+
+export const TRAIN_SHORT: Record<TrainLength, string> = {
+  none: '트레인 없음',
+  sweep: '약 15-30cm 끌림',
+  court: '약 30-45cm 끌림',
+  chapel: '약 90-120cm 끌림',
+  cathedral: '약 240cm+ 끌림',
+};
+
+export const FABRIC_SHORT: Record<FabricType, string> = {
+  satin: '매끄럽고 광택 있음',
+  mikado: '두껍고 탄탄한 실크',
+  organza: '얇고 반투명한 고급 소재',
+  tulle: '매우 얇은 그물망 소재',
+  lace: '섬세한 패턴의 소재',
+  chiffon: '얇고 부드러운 반투명',
+  taffeta: '바스락거리는 질감',
+};
+
+export const COLOR_SHORT: Record<ColorEnum, string> = {
+  pureWhite: '순수한 하얀색',
+  offWhite: '약간 따뜻한 화이트',
+  ivory: '따뜻한 크림빛',
+  champagne: '골드빛 베이지',
+  blush: '연한 핑크',
+  gold: '황금빛',
+  grey: '우아한 회색',
+  blue: '은은한 하늘빛',
+  black: '블랙',
+};
+
+export const EMBELLISHMENT_SHORT: Record<EmbellishmentType, string> = {
+  beads: '작은 구슬 장식',
+  laceApplique: '레이스 조각 부착 장식',
+  threeDFlorals: '입체 꽃 장식',
+  crystals: '수정 반짝이 장식',
+  pearls: '진주 장식',
+  embroidery: '실로 수놓은 패턴',
+  sequins: '작은 반짝이 원형',
+  ribbons: '리본 장식',
+  decorativeButtons: '장식용 버튼',
+};
+
+export const VEIL_LENGTH_SHORT: Record<VeilLength, string> = {
+  none: '베일 없음',
+  blusher: '얼굴 덮는 짧은 베일',
+  elbow: '팔꿈치 길이',
+  fingertip: '손끝 길이',
+  waltz: '발목과 바닥 사이',
+  chapel: '채플 트레인 정도',
+  cathedral: '매우 긴 베일',
+};
+
+export const VEIL_EDGE_SHORT: Record<VeilEdge, string> = {
+  cut: '깔끔하게 자른 단순 마감',
+  ribbon: '얇은 리본으로 마감',
+  beaded: '비즈 장식 가장자리',
+  lace: '레이스 장식 가장자리',
+};
+
+export const ACCESSORY_SHORT: Record<AccessoryType, string> = {
+  none: '헤어 액세서리 없음',
+  tiara: '왕관 모양 액세서리',
+  headband: '머리 두르는 밴드',
+  hairVine: '넝쿨 모양 헤어 장식',
+  hairComb: '빗 모양 장식',
+  floralCrown: '꽃으로 만든 화관',
 };
