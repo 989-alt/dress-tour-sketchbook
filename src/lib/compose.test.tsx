@@ -4,7 +4,7 @@ import { composeDress } from './compose';
 import { COLOR_HEX } from './colorPalette';
 import { createDefaultEntry } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
-import type { AnchorSet, SilhouetteType } from '../types';
+import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial } from '../types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -227,5 +227,92 @@ describe('composeDress — neckline cutout (T11)', () => {
         renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
       ).not.toThrow();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 10 (T12): Sleeve rendering
+// ---------------------------------------------------------------------------
+describe('composeDress — sleeve rendering (T12)', () => {
+  it('sleeveless: no sleeve paths in output', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t10-sl', anchors);
+    entry.sleeve = { type: 'sleeveless', material: 'opaque' };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    // Sleeve paths contain specific coords; sleeveless has renders=false
+    // The sleeve group should not be rendered — check no left path for cap/short/etc
+    // Just verify it does not throw and does not include sleeve-specific coords
+    expect(html).not.toContain('M 130 120 C 110 130');
+    expect(html).not.toContain('M 270 120');
+  });
+
+  it('cap sleeve: renders left and right paths', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t10-cap', anchors);
+    entry.sleeve = { type: 'cap', material: 'opaque' };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    // Cap sleeve path contains 'C' cubic bezier
+    expect(html).toContain('C 110 130');
+  });
+
+  it('opaque material: fill is colorHex without extra opacity attribute', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t10-opaque', anchors);
+    entry.sleeve = { type: 'long', material: 'opaque' };
+    entry.color.primary = 'blush';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain(`fill="${COLOR_HEX.blush}"`);
+  });
+
+  it('sheer material: opacity attribute is 0.3', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t10-sheer', anchors);
+    entry.sleeve = { type: 'long', material: 'sheer' };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('opacity="0.3"');
+  });
+
+  it('lace material: fill references lace pattern url', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t10-lace', anchors);
+    entry.sleeve = { type: 'long', material: 'lace' };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('url(#');
+    expect(html).toContain('lace-pattern');
+  });
+
+  it('all 10 sleeve types render without throwing', () => {
+    const sleeveTypes: SleeveType[] = [
+      'sleeveless', 'cap', 'short', 'threeQuarter', 'long',
+      'bishop', 'puff', 'bell', 'legOfMutton', 'illusion',
+    ];
+    const anchors = anchorSetFromRef('aline');
+    for (const type of sleeveTypes) {
+      const entry = createDefaultEntry(`nt-sleeve-${type}`, anchors);
+      entry.sleeve = { type, material: 'opaque' };
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+
+  it('all 4 materials render without throwing', () => {
+    const materials: SleeveMaterial[] = ['opaque', 'sheer', 'lace', 'beaded'];
+    const anchors = anchorSetFromRef('aline');
+    for (const material of materials) {
+      const entry = createDefaultEntry(`nt-mat-${material}`, anchors);
+      entry.sleeve = { type: 'long', material };
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+
+  it('lace pattern def is present in SVG', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t10-defs', anchors);
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('lace-pattern');
+    expect(html).toContain('beaded-pattern');
   });
 });

@@ -2,7 +2,8 @@ import type { ReactElement } from 'react';
 import type { DressEntry, AnchorSet } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
 import { NECKLINES } from '../parts/necklines';
-import { meshWarp, toSvgTransform } from './warp';
+import { SLEEVES } from '../parts/sleeves';
+import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
 export interface ComposeOptions {
@@ -60,6 +61,52 @@ function renderSilhouette(
 }
 
 // ---------------------------------------------------------------------------
+// Canonical reference shoulder/bust positions (must match silhouette pose.ts)
+// ---------------------------------------------------------------------------
+const REF_SHOULDER_L = { x: 140, y: 120 };
+const REF_SHOULDER_R = { x: 260, y: 120 };
+const REF_BUST       = { x: 200, y: 220 };
+
+/** Render sleeves using a shoulder+bust affine transform. */
+function renderSleeves(
+  entry: DressEntry,
+  anchors: AnchorSet,
+  idPrefix: string,
+): ReactElement | null {
+  const def = SLEEVES[entry.sleeve.type];
+  if (!def.renders) return null;
+
+  const xform = solveAffine(
+    [REF_SHOULDER_L, REF_SHOULDER_R, REF_BUST],
+    [anchors.shoulderL, anchors.shoulderR, anchors.bust],
+  );
+
+  const colorHex = COLOR_HEX[entry.color.primary];
+  const { material } = entry.sleeve;
+
+  // T15 will expand fabric patterns; for now we use opacity for sheer/lace/beaded.
+  // lace and beaded patterns are defined in <defs> and referenced by fill.
+  let fillProps: Record<string, string | number>;
+  if (material === 'sheer') {
+    fillProps = { fill: colorHex, opacity: 0.3 };
+  } else if (material === 'lace') {
+    fillProps = { fill: `url(#${idPrefix}lace-pattern)`, stroke: colorHex, strokeWidth: '0.5' };
+  } else if (material === 'beaded') {
+    fillProps = { fill: colorHex, opacity: 0.85 };
+  } else {
+    // opaque
+    fillProps = { fill: colorHex };
+  }
+
+  return (
+    <g transform={toSvgTransform(xform)}>
+      <path d={def.paths.left}  {...fillProps} />
+      <path d={def.paths.right} {...fillProps} />
+    </g>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -84,9 +131,19 @@ export function composeDress(
       height={photoHeight}
       viewBox={`0 0 ${photoWidth} ${photoHeight}`}
     >
+      {/* Material patterns for sleeves — T15 will expand these */}
+      <defs>
+        <pattern id={`${idPrefix}lace-pattern`} patternUnits="userSpaceOnUse" width="8" height="8">
+          <circle cx="2" cy="2" r="0.8" fill="white" stroke="#cccccc" strokeWidth="0.3" />
+          <circle cx="6" cy="6" r="0.8" fill="white" stroke="#cccccc" strokeWidth="0.3" />
+        </pattern>
+        <pattern id={`${idPrefix}beaded-pattern`} patternUnits="userSpaceOnUse" width="6" height="6">
+          <circle cx="3" cy="3" r="1.2" fill="#eeeeee" />
+        </pattern>
+      </defs>
       {renderSilhouette(entry, anchors, idPrefix)}
-      {/* T11+ neckline layer goes here */}
-      {/* T12+ sleeve layer goes here */}
+      {/* T12: sleeve layer */}
+      {renderSleeves(entry, anchors, idPrefix)}
       {/* T13+ bodice layer goes here */}
       {/* T17+ skirt layer goes here */}
       {/* T18+ embellishments go here */}
