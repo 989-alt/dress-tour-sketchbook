@@ -6,6 +6,7 @@ import { SLEEVES } from '../parts/sleeves';
 import { STRUCTURES, ACCENTS, WAIST_Y_OFFSET } from '../parts/bodices';
 import { BACKS } from '../parts/backs';
 import { FABRICS } from '../parts/fabrics';
+import { TEXTURES, slitCutout, trainPath } from '../parts/skirts';
 import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -75,8 +76,10 @@ function renderSilhouette(
   });
 
   // T11: combine bodyPath + neckline cutoutPath with evenodd fill rule to punch the opening
+  // T17: also include slit cutout if present
   const necklineDef = NECKLINES[entry.neckline];
-  const combinedPath = `${def.bodyPath} ${necklineDef.cutoutPath}`;
+  const slitPath = slitCutout(entry.skirt.slit.type, entry.skirt.slit.height);
+  const combinedPath = `${def.bodyPath} ${necklineDef.cutoutPath} ${slitPath}`.trim();
 
   const groups = warps.map((w, idx) => (
     <g
@@ -224,6 +227,64 @@ function renderAccent(
 }
 
 // ---------------------------------------------------------------------------
+// Canonical skirt reference anchors (must align with silhouette pose.ts)
+// ---------------------------------------------------------------------------
+const REF_WAIST_SKIRT = { x: 200, y: 400 };
+const REF_HIP_L = { x: 150, y: 500 };
+const REF_HIP_R = { x: 250, y: 500 };
+const REF_KNEE_L = { x: 170, y: 620 };
+const REF_KNEE_R = { x: 230, y: 620 };
+const REF_HEM_CENTER = { x: 200, y: 780 };
+
+/** Render skirt texture overlay warped to skirt region. */
+function renderSkirtTexture(
+  entry: DressEntry,
+  anchors: AnchorSet,
+  idPrefix: string,
+): ReactElement | null {
+  const def = TEXTURES[entry.skirt.texture];
+  const colorHex = COLOR_HEX[entry.color.primary];
+  const element = def.render({
+    topY: 400,
+    bottomY: 780,
+    leftX: 150,
+    rightX: 250,
+    layers: entry.skirt.layers,
+    color: colorHex,
+    idPrefix,
+  });
+  if (!element) return null;
+
+  const xform = solveAffine(
+    [REF_WAIST_SKIRT, REF_HIP_L, REF_HIP_R],
+    [anchors.waist, anchors.hipL, anchors.hipR],
+  );
+  return <g transform={toSvgTransform(xform)}>{element}</g>;
+}
+
+/** Render train extending below the hem. */
+function renderTrain(
+  entry: DressEntry,
+  anchors: AnchorSet,
+): ReactElement | null {
+  const path = trainPath(entry.skirt.train, REF_HEM_CENTER.x, REF_HEM_CENTER.y);
+  if (!path) return null;
+
+  const colorHex = COLOR_HEX[entry.color.primary];
+  // Use kneeL/kneeR/hemCenter — hem points are collinear in reference pose,
+  // so we use knees as the third reference point to form a proper triangle.
+  const xform = solveAffine(
+    [REF_KNEE_L, REF_KNEE_R, REF_HEM_CENTER],
+    [anchors.kneeL, anchors.kneeR, anchors.hemCenter],
+  );
+  return (
+    <g transform={toSvgTransform(xform)}>
+      <path d={path} fill={colorHex} data-train={entry.skirt.train} opacity={entry.opacity} />
+    </g>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -252,7 +313,11 @@ export function composeDress(
       <defs>
         {renderFabricDefs(entry, idPrefix)}
       </defs>
+      {/* T17: train behind silhouette */}
+      {renderTrain(entry, anchors)}
       {renderSilhouette(entry, anchors, idPrefix)}
+      {/* T17: skirt texture overlay */}
+      {renderSkirtTexture(entry, anchors, idPrefix)}
       {/* T12: sleeve layer */}
       {renderSleeves(entry, anchors, idPrefix)}
       {/* T13: bodice structure + accent layers */}
@@ -260,7 +325,6 @@ export function composeDress(
       {renderAccent(entry, anchors)}
       {/* T14: back hint layer */}
       {renderBackHint(entry, anchors, idPrefix)}
-      {/* T17+ skirt layer goes here */}
       {/* T18+ embellishments go here */}
     </svg>
   );

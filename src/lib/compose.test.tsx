@@ -4,7 +4,7 @@ import { composeDress } from './compose';
 import { COLOR_HEX } from './colorPalette';
 import { createDefaultEntry } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
-import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial, BackType, FabricType } from '../types';
+import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial, BackType, FabricType, SkirtTexture } from '../types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -677,6 +677,141 @@ describe('composeDress — ombre gradient (T16)', () => {
       (entry as { silhouette: SilhouetteType }).silhouette = sil;
       entry.color.gradient = 'ombre';
       entry.color.secondary = 'blush';
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 17 (T17): Skirt texture overlay
+// ---------------------------------------------------------------------------
+describe('composeDress — skirt texture overlay (T17)', () => {
+  it('pleated texture: renders data-texture=pleated in output', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-pleated', anchors);
+    entry.skirt.texture = 'pleated';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-texture="pleated"');
+  });
+
+  it('gathered texture: renders data-texture=gathered in output', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-gathered', anchors);
+    entry.skirt.texture = 'gathered';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-texture="gathered"');
+  });
+
+  it('smooth texture: no texture overlay rendered', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-smooth', anchors);
+    entry.skirt.texture = 'smooth';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-texture=');
+  });
+
+  it('all 8 textures render without throwing', () => {
+    const textures: SkirtTexture[] = [
+      'smooth', 'gathered', 'pleated', 'tiered',
+      'layeredTulle', 'ruffled', 'ruched', 'asymmetricDrape',
+    ];
+    const anchors = anchorSetFromRef('aline');
+    for (const texture of textures) {
+      const entry = createDefaultEntry(`t17-tex-${texture}`, anchors);
+      entry.skirt.texture = texture;
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 18 (T17): Slit cutout in silhouette path
+// ---------------------------------------------------------------------------
+describe('composeDress — slit cutout (T17)', () => {
+  it('side slit height=3: silhouette path contains slit cutout coords', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-slit-side', anchors);
+    entry.skirt.slit = { type: 'side', height: 3 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    // Slit cutout adds path with Z; fill-rule evenodd still present
+    expect(html).toContain('fill-rule="evenodd"');
+    // Side slit uses x=240 and x=250
+    expect(html).toContain('240');
+    expect(html).toContain('250');
+  });
+
+  it('front slit height=2: silhouette path contains front slit coords', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-slit-front', anchors);
+    entry.skirt.slit = { type: 'front', height: 2 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('fill-rule="evenodd"');
+    expect(html).toContain('195');
+  });
+
+  it('slit height=0 adds no slit path (same as default)', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-slit-none', anchors);
+    entry.skirt.slit = { type: 'side', height: 0 };
+    const htmlZero = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    const entryNone = createDefaultEntry('t17-slit-def', anchors);
+    const htmlNone = renderToStaticMarkup(composeDress(entryNone, anchors, DEFAULT_OPTIONS));
+    // Both should produce identical slit-relevant output
+    expect(htmlZero).toEqual(htmlNone);
+  });
+
+  it('slit renders without throwing for all types and heights', () => {
+    const anchors = anchorSetFromRef('aline');
+    for (const type of ['none', 'side', 'front'] as const) {
+      for (const height of [0, 1, 3, 5] as const) {
+        const entry = createDefaultEntry(`t17-slit-${type}-${height}`, anchors);
+        entry.skirt.slit = { type, height };
+        expect(() =>
+          renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+        ).not.toThrow();
+      }
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 19 (T17): Train rendering
+// ---------------------------------------------------------------------------
+describe('composeDress — train (T17)', () => {
+  it('chapel train: renders data-train=chapel element', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-chapel', anchors);
+    entry.skirt.train = 'chapel';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-train="chapel"');
+  });
+
+  it('train=none: no data-train element rendered', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-train-none', anchors);
+    entry.skirt.train = 'none';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-train=');
+  });
+
+  it('cathedral train: renders data-train=cathedral element', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t17-cathedral', anchors);
+    entry.skirt.train = 'cathedral';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-train="cathedral"');
+  });
+
+  it('all 5 train lengths render without throwing', () => {
+    const trains = ['none', 'sweep', 'court', 'chapel', 'cathedral'] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const train of trains) {
+      const entry = createDefaultEntry(`t17-tr-${train}`, anchors);
+      entry.skirt.train = train;
       expect(() =>
         renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
       ).not.toThrow();
