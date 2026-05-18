@@ -1,36 +1,52 @@
 import {
   forwardRef,
-  useEffect,
   useImperativeHandle,
   useRef,
+  useState,
   type PointerEvent,
 } from 'react';
+import type { RegionPrompt } from '../types';
 
 export interface SketchOverlayProps {
   photoWidth: number;
   photoHeight: number;
   displayWidth: number;
   displayHeight: number;
-  initialPng?: string | null;
   brushSize?: 'thin' | 'medium' | 'thick';
   color?: 'black' | 'navy' | 'red';
-  eraser?: boolean;
   acceptFinger?: boolean;
-  onChange?: (png: string | null) => void;
+  /** Already-saved region prompts. Rendered as colored overlays. */
+  savedRegions: RegionPrompt[];
 }
 
 export interface SketchOverlayHandle {
-  undo(): void;
-  clear(): void;
+  undoStroke(): void;
+  finishRegion(): string | null;
+  clearInProgress(): void;
 }
 
 const BRUSH_PX: Record<string, number> = { thin: 2, medium: 4, thick: 8 };
+
 const COLOR_MAP: Record<string, string> = {
-  black: '#222',
+  black: '#222222',
   navy: '#1a3a72',
   red: '#c0392b',
 };
-const UNDO_LIMIT = 10;
+
+type Stroke = Array<{ x: number; y: number }>;
+
+function buildPathData(strokes: Stroke[]): string {
+  return strokes
+    .map((pts) => {
+      if (pts.length === 0) return '';
+      const [first, ...rest] = pts;
+      const move = `M ${first.x.toFixed(1)} ${first.y.toFixed(1)}`;
+      const lines = rest.map((p) => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+      return lines ? `${move} ${lines}` : move;
+    })
+    .filter(Boolean)
+    .join(' ');
+}
 
 export const SketchOverlay = forwardRef<SketchOverlayHandle, SketchOverlayProps>(
   function SketchOverlay(
@@ -39,175 +55,151 @@ export const SketchOverlay = forwardRef<SketchOverlayHandle, SketchOverlayProps>
       photoHeight,
       displayWidth,
       displayHeight,
-      initialPng,
       brushSize = 'medium',
       color = 'black',
-      eraser = false,
       acceptFinger = false,
-      onChange,
+      savedRegions,
     },
     ref,
   ) {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const undoStack = useRef<ImageData[]>([]);
+    const [inProgressStrokes, setInProgressStrokes] = useState<Stroke[]>([]);
+    const currentStrokeRef = useRef<Stroke>([]);
     const isDrawing = useRef(false);
-    const hasMoved = useRef(false);
-    const lastPoint = useRef<{ x: number; y: number } | null>(null);
-
-    // Load initial PNG
-    useEffect(() => {
-      if (!initialPng) return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      const img = new Image();
-      img.onload = () => {
-        ctx.clearRect(0, 0, photoWidth, photoHeight);
-        ctx.drawImage(img, 0, 0);
-      };
-      img.src = initialPng;
-    }, [initialPng, photoWidth, photoHeight]);
-
-    useImperativeHandle(ref, () => ({
-      undo() {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        const snap = undoStack.current.pop();
-        if (snap) {
-          ctx.putImageData(snap, 0, 0);
-          onChange?.(canvas.toDataURL('image/png'));
-        }
-      },
-      clear() {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        pushUndo(ctx, canvas);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        onChange?.(null);
-      },
-    }));
-
-    function applyDrawStyle(ctx: CanvasRenderingContext2D, isEraser: boolean, drawColor: string, size: string) {
-      const paint = isEraser ? 'rgba(0,0,0,1)' : COLOR_MAP[drawColor];
-      ctx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
-      ctx.fillStyle = paint;
-      ctx.strokeStyle = paint;
-      ctx.lineWidth = BRUSH_PX[size];
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-    }
-
-    function pushUndo(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-      const snap = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      if (undoStack.current.length >= UNDO_LIMIT) undoStack.current.shift();
-      undoStack.current.push(snap);
-    }
+    const svgRef = useRef<SVGSVGElement>(null);
 
     const coordScaleX = photoWidth / displayWidth;
     const coordScaleY = photoHeight / displayHeight;
 
-    function toPhotoCoords(e: PointerEvent<HTMLCanvasElement>) {
-      const canvas = canvasRef.current;
-      if (!canvas) return null;
-      const rect = canvas.getBoundingClientRect();
+    function toPhotoCoords(e: PointerEvent<SVGSVGElement>) {
+      const svg = svgRef.current;
+      if (!svg) return null;
+      const rect = svg.getBoundingClientRect();
       return {
         x: (e.clientX - rect.left) * coordScaleX,
         y: (e.clientY - rect.top) * coordScaleY,
       };
     }
 
-    function shouldIgnore(e: PointerEvent<HTMLCanvasElement>): boolean {
+    function shouldIgnore(e: PointerEvent<SVGSVGElement>): boolean {
       if (acceptFinger) return false;
       return e.pointerType === 'touch';
     }
 
-    function onPointerDown(e: PointerEvent<HTMLCanvasElement>) {
+    function onPointerDown(e: PointerEvent<SVGSVGElement>) {
       if (shouldIgnore(e)) return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      canvas.setPointerCapture(e.pointerId);
-      pushUndo(ctx, canvas);
+      const pt = toPhotoCoords(e);
+      if (!pt) return;
+      svgRef.current?.setPointerCapture(e.pointerId);
       isDrawing.current = true;
-      hasMoved.current = false;
-
-      const pt = toPhotoCoords(e);
-      if (!pt) return;
-      lastPoint.current = pt;
-
-      applyDrawStyle(ctx, eraser, color, brushSize);
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, BRUSH_PX[brushSize] / 2, 0, Math.PI * 2);
-      ctx.fill();
+      currentStrokeRef.current = [pt];
     }
 
-    function onPointerMove(e: PointerEvent<HTMLCanvasElement>) {
+    function onPointerMove(e: PointerEvent<SVGSVGElement>) {
       if (!isDrawing.current || shouldIgnore(e)) return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
       const pt = toPhotoCoords(e);
       if (!pt) return;
-
-      const prev = lastPoint.current ?? pt;
-      applyDrawStyle(ctx, eraser, color, brushSize);
-      ctx.beginPath();
-      ctx.moveTo(prev.x, prev.y);
-      ctx.lineTo(pt.x, pt.y);
-      ctx.stroke();
-
-      lastPoint.current = pt;
-      hasMoved.current = true;
+      currentStrokeRef.current = [...currentStrokeRef.current, pt];
+      // Force re-render to show live stroke
+      setInProgressStrokes((prev) => {
+        // Replace the last entry with the live stroke if it's the current one;
+        // we handle it separately via currentStrokeRef for now but we need a render.
+        return [...prev];
+      });
     }
 
-    function finishStroke(e: PointerEvent<HTMLCanvasElement>) {
-      isDrawing.current = false;
-      lastPoint.current = null;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      canvas.releasePointerCapture(e.pointerId);
-      onChange?.(canvas.toDataURL('image/png'));
-    }
-
-    function onPointerUp(e: PointerEvent<HTMLCanvasElement>) {
+    function onPointerUp(e: PointerEvent<SVGSVGElement>) {
       if (!isDrawing.current) return;
-      finishStroke(e);
+      svgRef.current?.releasePointerCapture(e.pointerId);
+      isDrawing.current = false;
+      const stroke = currentStrokeRef.current;
+      currentStrokeRef.current = [];
+      if (stroke.length > 0) {
+        setInProgressStrokes((prev) => [...prev, stroke]);
+      }
     }
 
-    function onPointerLeave(e: PointerEvent<HTMLCanvasElement>) {
-      if (!isDrawing.current || !hasMoved.current) return;
-      finishStroke(e);
-    }
+    useImperativeHandle(ref, () => ({
+      undoStroke() {
+        setInProgressStrokes((prev) => prev.slice(0, -1));
+      },
+      finishRegion() {
+        const strokes = inProgressStrokes;
+        if (strokes.length === 0) return null;
+        const pathData = buildPathData(strokes);
+        setInProgressStrokes([]);
+        currentStrokeRef.current = [];
+        return pathData;
+      },
+      clearInProgress() {
+        setInProgressStrokes([]);
+        currentStrokeRef.current = [];
+      },
+    }));
 
-    // forwardRef + imperative handle + draw logic = structural floor ~210 lines
+    const strokeWidth = BRUSH_PX[brushSize];
+    const strokeColor = COLOR_MAP[color];
+
+    // Combine committed + live current stroke for display
+    const displayStrokes: Stroke[] = isDrawing.current && currentStrokeRef.current.length > 0
+      ? [...inProgressStrokes, currentStrokeRef.current]
+      : inProgressStrokes;
+
     return (
-      <canvas
-        ref={canvasRef}
-        width={photoWidth}
-        height={photoHeight}
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${photoWidth} ${photoHeight}`}
         style={{
           position: 'absolute',
           inset: 0,
           width: displayWidth,
           height: displayHeight,
-          cursor: eraser ? 'cell' : 'crosshair',
+          cursor: 'crosshair',
           touchAction: 'none',
+          overflow: 'visible',
         }}
+        aria-label="sketch-canvas"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerLeave={onPointerLeave}
-        aria-label="sketch-canvas"
-      />
+        onPointerLeave={(e) => { if (isDrawing.current) onPointerUp(e); }}
+      >
+        {/* Saved regions */}
+        {savedRegions.map((region) => (
+          <path
+            key={region.id}
+            d={region.pathData}
+            stroke={`hsl(${region.hue}, 70%, 50%)`}
+            strokeWidth={strokeWidth}
+            fill="none"
+            opacity={0.7}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            pointerEvents="none"
+          />
+        ))}
+
+        {/* In-progress strokes */}
+        {displayStrokes.map((stroke, i) => {
+          if (stroke.length === 0) return null;
+          const [first, ...rest] = stroke;
+          const d =
+            `M ${first.x.toFixed(1)} ${first.y.toFixed(1)}` +
+            rest.map((p) => ` L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join('');
+          return (
+            <path
+              key={i}
+              d={d}
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              fill="none"
+              opacity={0.85}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              pointerEvents="none"
+            />
+          );
+        })}
+      </svg>
     );
   },
 );

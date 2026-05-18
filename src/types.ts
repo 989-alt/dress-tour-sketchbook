@@ -102,6 +102,19 @@ export type VeilEdge = 'cut' | 'ribbon' | 'beaded' | 'lace';
 
 export type AccessoryType = 'none' | 'tiara' | 'headband' | 'hairVine' | 'hairComb' | 'floralCrown';
 
+export interface RegionPrompt {
+  id: string;
+  /** SVG-friendly stroke path data in photo coordinate space.
+   * Encoded as a single 'd' attribute string with M/L commands, multiple subpaths OK.
+   * Photo coords (not display coords). */
+  pathData: string;
+  /** User's text instruction for this region. */
+  prompt: string;
+  /** Hue rotation (degrees) for visual differentiation in the overlay. 0-360. */
+  hue: number;
+  createdAt: number;
+}
+
 export interface AIResult {
   /** data: URL of generated PNG (or JPEG/WebP — whatever the API returned) */
   dataUrl: string;
@@ -202,6 +215,7 @@ export interface DressEntry {
   /** 0..1 inclusive */
   opacity: number;
   sketchPng: string | null;
+  regionPrompts: RegionPrompt[];
 
   categorical: {
     necklineNotes: string[];
@@ -264,6 +278,7 @@ export function createDefaultEntry(id: string, anchors: AnchorSet): DressEntry {
 
     opacity: 1.0,
     sketchPng: null,
+    regionPrompts: [],
 
     categorical: {
       necklineNotes: [],

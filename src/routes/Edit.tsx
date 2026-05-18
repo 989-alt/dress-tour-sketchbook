@@ -29,6 +29,7 @@ import { EmbellishmentsPanel } from '../components/panels/EmbellishmentsPanel';
 import { VeilPanel } from '../components/panels/VeilPanel';
 import { AccessoryPanel } from '../components/panels/AccessoryPanel';
 import type { SketchOverlayHandle } from '../components/SketchOverlay';
+import type { RegionPrompt } from '../types';
 
 type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'back' | 'fabric' | 'color' | 'skirt' | 'embellishments' | 'veil' | 'hair' | 'anchor' | 'pen' | 'meta';
 
@@ -83,7 +84,6 @@ export default function Edit() {
   // Pen state
   const [brushSize, setBrushSize] = useState<'thin' | 'medium' | 'thick'>('medium');
   const [penColor, setPenColor] = useState<'black' | 'navy' | 'red'>('black');
-  const [eraser, setEraser] = useState(false);
   const [acceptFinger, setAcceptFinger] = useState(false);
   const sketchRef = useRef<SketchOverlayHandle>(null);
 
@@ -181,6 +181,32 @@ export default function Edit() {
       handleEntryChange({ anchors: next });
     },
     [handleEntryChange],
+  );
+
+  const handleRegionAdd = useCallback(
+    (region: RegionPrompt) => {
+      setCurrentEntry((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, regionPrompts: [...(prev.regionPrompts ?? []), region] };
+        setSaving(true);
+        debouncedSave(next);
+        return next;
+      });
+    },
+    [debouncedSave],
+  );
+
+  const handleRegionDelete = useCallback(
+    (id: string) => {
+      setCurrentEntry((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, regionPrompts: (prev.regionPrompts ?? []).filter((r) => r.id !== id) };
+        setSaving(true);
+        debouncedSave(next);
+        return next;
+      });
+    },
+    [debouncedSave],
   );
 
   const handleGenerate = useCallback(async () => {
@@ -367,14 +393,16 @@ export default function Edit() {
           <PenPanel
             brushSize={brushSize}
             color={penColor}
-            eraser={eraser}
             acceptFinger={acceptFinger}
             onBrushSizeChange={setBrushSize}
             onColorChange={setPenColor}
-            onEraserChange={setEraser}
             onAcceptFingerChange={setAcceptFinger}
-            onUndo={() => sketchRef.current?.undo()}
-            onClear={() => sketchRef.current?.clear()}
+            onUndo={() => sketchRef.current?.undoStroke()}
+            onClearInProgress={() => sketchRef.current?.clearInProgress()}
+            onFinishRegion={() => sketchRef.current?.finishRegion() ?? null}
+            savedRegions={currentEntry.regionPrompts ?? []}
+            onRegionAdd={handleRegionAdd}
+            onRegionDelete={handleRegionDelete}
           />
         );
       case 'meta':
@@ -446,9 +474,13 @@ export default function Edit() {
             showSketch={activeTab === 'pen'}
             manualMode={manualMode}
             onAnchorChange={handleAnchorChange}
-            onSketchChange={(png) => handleEntryChange({ sketchPng: png })}
             aiResultDataUrl={currentEntry.aiResult?.dataUrl ?? null}
             className="max-w-full"
+            sketchRef={sketchRef}
+            savedRegions={currentEntry.regionPrompts ?? []}
+            sketchBrushSize={brushSize}
+            sketchColor={penColor}
+            sketchAcceptFinger={acceptFinger}
           />
         </div>
 

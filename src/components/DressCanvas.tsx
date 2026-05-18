@@ -1,8 +1,8 @@
-import { cloneElement, useEffect, useRef, useState } from 'react';
-import type { DressEntry, AnchorSet } from '../types';
+import { cloneElement, useEffect, useRef, useState, type Ref } from 'react';
+import type { DressEntry, AnchorSet, RegionPrompt } from '../types';
 import { composeDress } from '../lib/compose';
 import { AnchorOverlay } from './AnchorOverlay';
-import { SketchOverlay } from './SketchOverlay';
+import { SketchOverlay, type SketchOverlayHandle } from './SketchOverlay';
 
 export interface DressCanvasProps {
   photo: Blob;
@@ -14,11 +14,15 @@ export interface DressCanvasProps {
   showAnchors?: boolean;
   showSketch?: boolean;
   onAnchorChange?: (next: AnchorSet) => void;
-  onSketchChange?: (sketchPng: string | null) => void;
   manualMode?: boolean;
   className?: string;
   /** When set, the AI-generated image replaces the photo + SVG composition. */
   aiResultDataUrl?: string | null;
+  sketchRef?: Ref<SketchOverlayHandle>;
+  savedRegions?: RegionPrompt[];
+  sketchBrushSize?: 'thin' | 'medium' | 'thick';
+  sketchColor?: 'black' | 'navy' | 'red';
+  sketchAcceptFinger?: boolean;
 }
 
 export function DressCanvas({
@@ -31,10 +35,14 @@ export function DressCanvas({
   showAnchors = false,
   showSketch = false,
   onAnchorChange,
-  onSketchChange,
   manualMode = false,
   className,
   aiResultDataUrl,
+  sketchRef,
+  savedRegions = [],
+  sketchBrushSize,
+  sketchColor,
+  sketchAcceptFinger,
 }: DressCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [objectURL, setObjectURL] = useState<string | null>(null);
@@ -155,12 +163,15 @@ export function DressCanvas({
       {/* Layer 4: sketch overlay */}
       {showSketch && (
         <SketchOverlay
+          ref={sketchRef}
           photoWidth={photoWidth}
           photoHeight={photoHeight}
           displayWidth={displaySize.w}
           displayHeight={displaySize.h}
-          initialPng={entry.sketchPng}
-          onChange={onSketchChange}
+          brushSize={sketchBrushSize}
+          color={sketchColor}
+          acceptFinger={sketchAcceptFinger}
+          savedRegions={savedRegions}
         />
       )}
     </div>
