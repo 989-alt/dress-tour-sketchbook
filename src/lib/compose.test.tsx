@@ -316,3 +316,164 @@ describe('composeDress — sleeve rendering (T12)', () => {
     expect(html).toContain('beaded-pattern');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Test 11 (T13): Bodice structure rendering
+// ---------------------------------------------------------------------------
+describe('composeDress — bodice structure (T13)', () => {
+  it('corset structure: includes data-structure=corset markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-corset', anchors);
+    entry.bodice.structure = 'corset';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-structure="corset"');
+  });
+
+  it('peplum structure: includes data-structure=peplum markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-peplum', anchors);
+    entry.bodice.structure = 'peplum';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-structure="peplum"');
+  });
+
+  it('mockPeplum structure: includes data-structure=mockPeplum markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-mock', anchors);
+    entry.bodice.structure = 'mockPeplum';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-structure="mockPeplum"');
+  });
+
+  it('softFit structure: renders without throwing (no visible overlay)', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-soft', anchors);
+    entry.bodice.structure = 'softFit';
+    expect(() =>
+      renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+    ).not.toThrow();
+  });
+
+  it('all 4 structures render without throwing', () => {
+    const structures = ['corset', 'softFit', 'peplum', 'mockPeplum'] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const structure of structures) {
+      const entry = createDefaultEntry(`t13-all-${structure}`, anchors);
+      entry.bodice.structure = structure;
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 12 (T13): Waist accent rendering
+// ---------------------------------------------------------------------------
+describe('composeDress — waist accent (T13)', () => {
+  it('sash accent: includes data-accent=sash markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-sash', anchors);
+    entry.bodice.accent = 'sash';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-accent="sash"');
+  });
+
+  it('ribbon accent: includes data-accent=ribbon markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-ribbon', anchors);
+    entry.bodice.accent = 'ribbon';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-accent="ribbon"');
+  });
+
+  it('brooch accent: includes data-accent=brooch markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-brooch', anchors);
+    entry.bodice.accent = 'brooch';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-accent="brooch"');
+  });
+
+  it('beadedBand accent: includes data-accent=beadedBand markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-beaded', anchors);
+    entry.bodice.accent = 'beadedBand';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-accent="beadedBand"');
+  });
+
+  it('none accent: does not add accent markup', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-none', anchors);
+    entry.bodice.accent = 'none';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-accent=');
+  });
+
+  it('all 5 accent types render without throwing', () => {
+    const accents = ['none', 'sash', 'ribbon', 'brooch', 'beadedBand'] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const accent of accents) {
+      const entry = createDefaultEntry(`t13-acc-${accent}`, anchors);
+      entry.bodice.accent = accent;
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 13 (T13): Waist position offset affects rendered output
+// ---------------------------------------------------------------------------
+describe('composeDress — waist position offset (T13)', () => {
+  it('empire waistPosition renders without throwing', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-emp', anchors);
+    entry.bodice.waistPosition = 'empire';
+    entry.bodice.structure = 'corset';
+    expect(() =>
+      renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+    ).not.toThrow();
+  });
+
+  it('drop waistPosition renders without throwing', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t13-drop', anchors);
+    entry.bodice.waistPosition = 'drop';
+    entry.bodice.accent = 'sash';
+    expect(() =>
+      renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+    ).not.toThrow();
+  });
+
+  it('corset with empire waistPosition differs from corset with natural', () => {
+    const anchors = anchorSetFromRef('aline');
+    const empire = createDefaultEntry('t13-emp2', anchors);
+    empire.bodice.structure = 'corset';
+    empire.bodice.waistPosition = 'empire';
+
+    const natural = createDefaultEntry('t13-nat2', anchors);
+    natural.bodice.structure = 'corset';
+    natural.bodice.waistPosition = 'natural';
+
+    const empireHtml = renderToStaticMarkup(composeDress(empire, anchors, DEFAULT_OPTIONS));
+    const naturalHtml = renderToStaticMarkup(composeDress(natural, anchors, DEFAULT_OPTIONS));
+    // empire waistY=300, natural waistY=400, so the corset lines differ
+    expect(empireHtml).not.toEqual(naturalHtml);
+  });
+
+  it('all 5 waist positions render without throwing (with sash accent)', () => {
+    const positions = ['natural', 'empire', 'basque', 'drop', 'asymmetric'] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const waistPosition of positions) {
+      const entry = createDefaultEntry(`t13-wp-${waistPosition}`, anchors);
+      entry.bodice.waistPosition = waistPosition;
+      entry.bodice.accent = 'sash';
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});

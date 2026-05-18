@@ -3,6 +3,7 @@ import type { DressEntry, AnchorSet } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
 import { NECKLINES } from '../parts/necklines';
 import { SLEEVES } from '../parts/sleeves';
+import { STRUCTURES, ACCENTS, WAIST_Y_OFFSET } from '../parts/bodices';
 import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -61,11 +62,12 @@ function renderSilhouette(
 }
 
 // ---------------------------------------------------------------------------
-// Canonical reference shoulder/bust positions (must match silhouette pose.ts)
+// Canonical reference shoulder/bust/waist positions (must match silhouette pose.ts)
 // ---------------------------------------------------------------------------
 const REF_SHOULDER_L = { x: 140, y: 120 };
 const REF_SHOULDER_R = { x: 260, y: 120 };
 const REF_BUST       = { x: 200, y: 220 };
+const REF_WAIST      = { x: 200, y: 400 };
 
 /** Render sleeves using a shoulder+bust affine transform. */
 function renderSleeves(
@@ -106,6 +108,56 @@ function renderSleeves(
   );
 }
 
+/** Render bodice structure overlay (corset lines, peplum, etc.). */
+function renderBodice(
+  entry: DressEntry,
+  anchors: AnchorSet,
+): ReactElement | null {
+  const def = STRUCTURES[entry.bodice.structure];
+  const waistY = REF_WAIST.y + WAIST_Y_OFFSET[entry.bodice.waistPosition];
+  const ctx = {
+    topY: 120,
+    waistY,
+    leftX: REF_SHOULDER_L.x,
+    rightX: REF_SHOULDER_R.x,
+    shoulderLX: REF_SHOULDER_L.x,
+    shoulderRX: REF_SHOULDER_R.x,
+  };
+  const colorHex = COLOR_HEX[entry.color.primary];
+  const element = def.render(ctx, colorHex, colorHex);
+  if (!element) return null;
+
+  const xform = solveAffine(
+    [REF_SHOULDER_L, REF_SHOULDER_R, REF_WAIST],
+    [anchors.shoulderL, anchors.shoulderR, anchors.waist],
+  );
+  return <g transform={toSvgTransform(xform)}>{element}</g>;
+}
+
+/** Render waist accent (sash, ribbon, brooch, beadedBand). */
+function renderAccent(
+  entry: DressEntry,
+  anchors: AnchorSet,
+): ReactElement | null {
+  const def = ACCENTS[entry.bodice.accent];
+  const waistY = REF_WAIST.y + WAIST_Y_OFFSET[entry.bodice.waistPosition];
+  const ctx = {
+    waistY,
+    leftX: REF_SHOULDER_L.x,
+    rightX: REF_SHOULDER_R.x,
+    centerX: (REF_SHOULDER_L.x + REF_SHOULDER_R.x) / 2,
+    accentColor: COLOR_HEX[entry.bodice.accentColor],
+  };
+  const element = def.render(ctx);
+  if (!element) return null;
+
+  const xform = solveAffine(
+    [REF_SHOULDER_L, REF_SHOULDER_R, REF_WAIST],
+    [anchors.shoulderL, anchors.shoulderR, anchors.waist],
+  );
+  return <g transform={toSvgTransform(xform)}>{element}</g>;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -144,7 +196,9 @@ export function composeDress(
       {renderSilhouette(entry, anchors, idPrefix)}
       {/* T12: sleeve layer */}
       {renderSleeves(entry, anchors, idPrefix)}
-      {/* T13+ bodice layer goes here */}
+      {/* T13: bodice structure + accent layers */}
+      {renderBodice(entry, anchors)}
+      {renderAccent(entry, anchors)}
       {/* T17+ skirt layer goes here */}
       {/* T18+ embellishments go here */}
     </svg>

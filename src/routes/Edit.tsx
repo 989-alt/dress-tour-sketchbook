@@ -14,15 +14,17 @@ import { PenPanel } from '../components/panels/PenPanel';
 import { MetadataPanel } from '../components/panels/MetadataPanel';
 import { NecklinePanel } from '../components/panels/NecklinePanel';
 import { SleevePanel } from '../components/panels/SleevePanel';
+import { BodicePanel } from '../components/panels/BodicePanel';
 import type { SketchOverlayHandle } from '../components/SketchOverlay';
 
-type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'anchor' | 'pen' | 'meta';
+type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'anchor' | 'pen' | 'meta';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'basic', label: '기본' },
   { id: 'silhouette', label: '실루엣' },
   { id: 'neckline', label: '넥라인' },
   { id: 'sleeve', label: '소매' },
+  { id: 'bodice', label: '보디스' },
   { id: 'anchor', label: '앵커' },
   { id: 'pen', label: '펜' },
   { id: 'meta', label: '메모' },
@@ -178,6 +180,13 @@ export default function Edit() {
           <SleevePanel
             value={currentEntry.sleeve}
             onChange={(s) => handleEntryChange({ sleeve: s })}
+          />
+        );
+      case 'bodice':
+        return (
+          <BodicePanel
+            value={currentEntry.bodice}
+            onChange={(b) => handleEntryChange({ bodice: b })}
           />
         );
       case 'anchor':
