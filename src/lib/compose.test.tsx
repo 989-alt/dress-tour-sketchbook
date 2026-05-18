@@ -188,3 +188,44 @@ describe('composeDress — entry.anchors vs passed anchors', () => {
     expect(clipCount).toBe(12);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Test 9 (T11): Neckline cutout — evenodd fill rule + cutout path present
+// ---------------------------------------------------------------------------
+describe('composeDress — neckline cutout (T11)', () => {
+  it('vRegular neckline: path uses fill-rule evenodd and includes the V cutout d-string', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t9', anchors);
+    entry.neckline = 'vRegular';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+
+    expect(html).toContain('fill-rule="evenodd"');
+    // The V-cutout path starts with M 140,120 L 140,130 L 200,240
+    expect(html).toContain('140,120');
+  });
+
+  it('sweetheart neckline: path uses fill-rule evenodd and includes cutout coords', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t9b', anchors);
+    entry.neckline = 'sweetheart';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+
+    expect(html).toContain('fill-rule="evenodd"');
+  });
+
+  it('all 15 necklines render without throwing', () => {
+    const necklines = [
+      'sweetheart', 'vRegular', 'vDeep', 'vPlunging', 'halter',
+      'offShoulder', 'oneShoulder', 'strapless', 'boat', 'illusionCrew',
+      'square', 'scoop', 'portrait', 'highNeck', 'keyhole',
+    ] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const neckline of necklines) {
+      const entry = createDefaultEntry(`nt-neck-${neckline}`, anchors);
+      entry.neckline = neckline;
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});

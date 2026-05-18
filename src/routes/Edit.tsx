@@ -12,13 +12,15 @@ import { SilhouettePanel } from '../components/panels/SilhouettePanel';
 import { AnchorPanel } from '../components/panels/AnchorPanel';
 import { PenPanel } from '../components/panels/PenPanel';
 import { MetadataPanel } from '../components/panels/MetadataPanel';
+import { NecklinePanel } from '../components/panels/NecklinePanel';
 import type { SketchOverlayHandle } from '../components/SketchOverlay';
 
-type TabId = 'basic' | 'silhouette' | 'anchor' | 'pen' | 'meta';
+type TabId = 'basic' | 'silhouette' | 'neckline' | 'anchor' | 'pen' | 'meta';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'basic', label: '기본' },
   { id: 'silhouette', label: '실루엣' },
+  { id: 'neckline', label: '넥라인' },
   { id: 'anchor', label: '앵커' },
   { id: 'pen', label: '펜' },
   { id: 'meta', label: '메모' },
@@ -160,6 +162,13 @@ export default function Edit() {
           <SilhouettePanel
             value={currentEntry.silhouette}
             onChange={(s) => handleEntryChange({ silhouette: s })}
+          />
+        );
+      case 'neckline':
+        return (
+          <NecklinePanel
+            value={currentEntry.neckline}
+            onChange={(n) => handleEntryChange({ neckline: n })}
           />
         );
       case 'anchor':

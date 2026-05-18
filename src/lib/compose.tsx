@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { DressEntry, AnchorSet } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
+import { NECKLINES } from '../parts/necklines';
 import { meshWarp, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -36,13 +37,17 @@ function renderSilhouette(
     );
   });
 
+  // T11: combine bodyPath + neckline cutoutPath with evenodd fill rule to punch the opening
+  const necklineDef = NECKLINES[entry.neckline];
+  const combinedPath = `${def.bodyPath} ${necklineDef.cutoutPath}`;
+
   const groups = warps.map((w, idx) => (
     <g
       key={idx}
       clipPath={`url(#${idPrefix}tri-${idx})`}
       transform={toSvgTransform(w.transform)}
     >
-      <path d={def.bodyPath} fill={fill} />
+      <path d={combinedPath} fillRule="evenodd" fill={fill} />
     </g>
   ));
 
