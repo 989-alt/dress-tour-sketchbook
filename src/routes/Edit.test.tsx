@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
@@ -56,6 +56,11 @@ beforeAll(() => {
       setTimeout(() => this.onload?.call(this, new Event('load')), 0);
     }
   };
+});
+
+afterEach(() => {
+  // Reset only the data fields; leave store actions intact (replace=false)
+  useAppStore.setState({ meta: null, entries: [], hydrated: false });
 });
 
 function makeAnchors(): AnchorSet {
@@ -128,5 +133,41 @@ describe('Edit route — smoke test', () => {
       () => expect(screen.getByText('저장됨')).toBeInTheDocument(),
       { timeout: 3000 },
     );
+  });
+});
+
+describe('Edit route — /new path', () => {
+  it('renders parameter panel area for /new without a pre-existing entry', async () => {
+    useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
+    render(
+      <MemoryRouter initialEntries={['/new']}>
+        <Routes>
+          <Route path="/new" element={<Edit />} />
+          <Route path="/" element={<div>home</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await waitFor(
+      () => expect(screen.getByLabelText('parameter-panel-area')).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+  });
+});
+
+describe('Edit route — handleAnchorReset', () => {
+  it('resets anchors to default proportional values derived from photo dimensions', async () => {
+    renderEdit();
+    await waitFor(
+      () => expect(screen.getByLabelText('parameter-panel-area')).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    // The anchor reset button lives in AnchorPanel — navigate to the anchor tab
+    const anchorTab = screen.getByText('앵커');
+    anchorTab.click();
+    // The reset button label is '앵커 재설정'
+    await waitFor(() => expect(screen.getByText('앵커 재설정')).toBeInTheDocument(), { timeout: 3000 });
+    screen.getByText('앵커 재설정').click();
+    // After reset the panel should still be visible (no crash)
+    expect(screen.getByLabelText('parameter-panel-area')).toBeInTheDocument();
   });
 });

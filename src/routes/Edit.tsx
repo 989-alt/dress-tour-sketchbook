@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
 import { createDefaultEntry, type AnchorSet, type DressEntry } from '../types';
 import { loadImageWithCorrectOrientation } from '../lib/exif';
 import { debounce } from '../lib/debounce';
+import { defaultAnchors } from '../lib/defaultAnchors';
 import { DressCanvas } from '../components/DressCanvas';
 import { ParameterPanel } from '../components/ParameterPanel';
 import { BasicPanel } from '../components/panels/BasicPanel';
@@ -23,29 +24,10 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'meta', label: '메모' },
 ];
 
-function defaultAnchors(w: number, h: number): AnchorSet {
-  // Rough proportional defaults when no pose detection is available
-  const cx = w / 2;
-  return {
-    headTop:    { x: cx,          y: h * 0.02 },
-    chin:       { x: cx,          y: h * 0.10 },
-    neckCenter: { x: cx,          y: h * 0.13 },
-    shoulderL:  { x: cx - w * 0.10, y: h * 0.17 },
-    shoulderR:  { x: cx + w * 0.10, y: h * 0.17 },
-    bust:       { x: cx,          y: h * 0.27 },
-    waist:      { x: cx,          y: h * 0.42 },
-    hipL:       { x: cx - w * 0.08, y: h * 0.52 },
-    hipR:       { x: cx + w * 0.08, y: h * 0.52 },
-    kneeL:      { x: cx - w * 0.06, y: h * 0.70 },
-    kneeR:      { x: cx + w * 0.06, y: h * 0.70 },
-    hemL:       { x: cx - w * 0.10, y: h * 0.90 },
-    hemR:       { x: cx + w * 0.10, y: h * 0.90 },
-    hemCenter:  { x: cx,          y: h * 0.92 },
-  };
-}
-
 export default function Edit() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const isNew = location.pathname === '/new';
   const navigate = useNavigate();
   const { meta, entries, upsertEntry, hydrated, hydrate } = useAppStore();
 
@@ -73,7 +55,7 @@ export default function Edit() {
   // Resolve entry once store is ready
   useEffect(() => {
     if (!hydrated) return;
-    if (id === 'new') {
+    if (isNew) {
       const dims = photoDims ?? { w: 800, h: 1200 };
       const anchors = defaultAnchors(dims.w, dims.h);
       const newEntry = createDefaultEntry(crypto.randomUUID(), anchors);
@@ -84,10 +66,14 @@ export default function Edit() {
       if (found) {
         setCurrentEntry(found);
         setCurrentAnchors(found.anchors);
+      } else {
+        navigate('/');
       }
+    } else {
+      navigate('/');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, id]);
+  }, [hydrated, isNew, id]);
 
   // Load photo dimensions
   useEffect(() => {
@@ -115,6 +101,11 @@ export default function Edit() {
     [upsertEntry],
   );
 
+  // Cancel debounce on unmount to avoid calling setSaving on unmounted component
+  useEffect(() => {
+    return () => debouncedSave.cancel();
+  }, [debouncedSave]);
+
   const handleEntryChange = useCallback(
     (patch: Partial<DressEntry>) => {
       setCurrentEntry((prev) => {
@@ -138,8 +129,11 @@ export default function Edit() {
 
   const handleAnchorReset = useCallback(() => {
     if (!currentEntry) return;
-    setCurrentAnchors(currentEntry.anchors);
-  }, [currentEntry]);
+    const d = photoDims ?? { w: 800, h: 1200 };
+    const fresh = defaultAnchors(d.w, d.h);
+    setCurrentAnchors(fresh);
+    handleEntryChange({ anchors: fresh });
+  }, [currentEntry, photoDims, handleEntryChange]);
 
   if (!hydrated || !currentEntry || !currentAnchors || !meta?.basePhoto) {
     return (
