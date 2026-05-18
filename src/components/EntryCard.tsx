@@ -23,9 +23,18 @@ export function EntryCard({ entry, onClick }: EntryCardProps) {
       onClick={onClick}
       className="flex flex-col items-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden text-left w-full"
     >
-      {/* Mini dress render */}
+      {/* Mini dress render — AI image takes priority when available */}
       <div className="bg-gray-50 w-full flex items-center justify-center py-2">
-        {dressSvg}
+        {entry.aiResult?.dataUrl ? (
+          <img
+            src={entry.aiResult.dataUrl}
+            alt={entry.nickname || '이름 없음'}
+            className="w-full h-full object-cover"
+            style={{ width: CARD_W, height: CARD_H }}
+          />
+        ) : (
+          dressSvg
+        )}
       </div>
 
       <div className="px-2 py-2 w-full">

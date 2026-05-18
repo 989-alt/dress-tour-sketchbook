@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { exportAllToJson, importFromJson } from './exportJson';
-import type { AppMeta } from '../types';
+import type { AppMeta, DressEntry } from '../types';
+import { createDefaultEntry } from '../types';
+import { defaultAnchors } from './defaultAnchors';
 
 beforeEach(() => {
   // Mock FileReader
@@ -109,5 +111,73 @@ describe('importFromJson', () => {
     });
     const result = await importFromJson(bundle);
     expect(result.meta?.basePhoto).toBeInstanceOf(Blob);
+  });
+
+  it('defaults aiResult and referenceDress to null when missing (old export)', async () => {
+    // Simulate an older export that doesn't include aiResult / referenceDress
+    const oldEntry = { id: 'old-1', nickname: '구형', shop: '', dressNo: '' };
+    const bundle = JSON.stringify({
+      version: 1,
+      exportedAt: 0,
+      meta: null,
+      entries: [oldEntry],
+    });
+    const result = await importFromJson(bundle);
+    expect(result.entries[0].aiResult).toBeNull();
+    expect(result.entries[0].referenceDress).toBeNull();
+  });
+});
+
+describe('exportAllToJson with aiResult', () => {
+  function makeEntryWithAi(): DressEntry {
+    const anchors = defaultAnchors(400, 800);
+    const e = createDefaultEntry('ai-entry', anchors);
+    return {
+      ...e,
+      aiResult: {
+        dataUrl: 'data:image/png;base64,AAAA',
+        generatedAt: 1000,
+        modelId: 'gemini',
+        paramsHash: 'abc',
+        prompt: 'wedding dress',
+      },
+      referenceDress: {
+        dataUrl: 'data:image/jpeg;base64,BBBB',
+        uploadedAt: 2000,
+      },
+    };
+  }
+
+  it('round-trips an entry with aiResult populated', async () => {
+    const entry = makeEntryWithAi();
+    const json = await exportAllToJson(null, [entry]);
+    const result = await importFromJson(json);
+    expect(result.entries[0].aiResult?.dataUrl).toBe('data:image/png;base64,AAAA');
+    expect(result.entries[0].aiResult?.modelId).toBe('gemini');
+    expect(result.entries[0].referenceDress?.dataUrl).toBe('data:image/jpeg;base64,BBBB');
+  });
+
+  it('strips dataUrl from aiResult and referenceDress when includeAiImages is false', async () => {
+    const entry = makeEntryWithAi();
+    const json = await exportAllToJson(null, [entry], { includeAiImages: false });
+    const parsed = JSON.parse(json);
+    expect(parsed.entries[0].aiResult.dataUrl).toBe('');
+    expect(parsed.entries[0].referenceDress.dataUrl).toBe('');
+  });
+
+  it('preserves dataUrls when includeAiImages is true (default)', async () => {
+    const entry = makeEntryWithAi();
+    const json = await exportAllToJson(null, [entry], { includeAiImages: true });
+    const parsed = JSON.parse(json);
+    expect(parsed.entries[0].aiResult.dataUrl).toBe('data:image/png;base64,AAAA');
+  });
+
+  it('preserves other aiResult fields even when includeAiImages is false', async () => {
+    const entry = makeEntryWithAi();
+    const json = await exportAllToJson(null, [entry], { includeAiImages: false });
+    const parsed = JSON.parse(json);
+    expect(parsed.entries[0].aiResult.modelId).toBe('gemini');
+    expect(parsed.entries[0].aiResult.prompt).toBe('wedding dress');
+    expect(parsed.entries[0].aiResult.generatedAt).toBe(1000);
   });
 });

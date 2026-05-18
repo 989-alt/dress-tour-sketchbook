@@ -11,6 +11,16 @@ export interface ExportBundle {
   entries: DressEntry[];
 }
 
+export interface ExportOptions {
+  /**
+   * Include aiResult.dataUrl and referenceDress.dataUrl (default true).
+   * When false, replaces dataUrl with empty string to keep file small.
+   * Note: AI-generated images are typically 500KB–2MB as base64; exported
+   * JSON can balloon significantly when many entries have aiResult set.
+   */
+  includeAiImages?: boolean;
+}
+
 async function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -20,8 +30,21 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-export async function exportAllToJson(meta: AppMeta | null, entries: DressEntry[]): Promise<string> {
+export async function exportAllToJson(
+  meta: AppMeta | null,
+  entries: DressEntry[],
+  options?: ExportOptions,
+): Promise<string> {
+  const includeAiImages = options?.includeAiImages ?? true;
   const basePhotoDataUrl = meta?.basePhoto ? await blobToDataUrl(meta.basePhoto) : null;
+
+  const serializedEntries: DressEntry[] = includeAiImages
+    ? entries
+    : entries.map((e) => ({
+        ...e,
+        aiResult: e.aiResult ? { ...e.aiResult, dataUrl: '' } : null,
+        referenceDress: e.referenceDress ? { ...e.referenceDress, dataUrl: '' } : null,
+      }));
 
   const bundle: ExportBundle = {
     version: 1,
@@ -31,7 +54,7 @@ export async function exportAllToJson(meta: AppMeta | null, entries: DressEntry[
       createdAt: meta?.createdAt ?? Date.now(),
       basePhotoDataUrl,
     },
-    entries,
+    entries: serializedEntries,
   };
 
   return JSON.stringify(bundle, null, 2);
@@ -89,5 +112,12 @@ export async function importFromJson(jsonText: string): Promise<{ meta: AppMeta 
         }
       : null;
 
-  return { meta, entries: b.entries };
+  // Backwards-compat: older exports may not have aiResult / referenceDress fields.
+  const entries: DressEntry[] = b.entries.map((e) => ({
+    ...e,
+    aiResult: e.aiResult ?? null,
+    referenceDress: e.referenceDress ?? null,
+  }));
+
+  return { meta, entries };
 }

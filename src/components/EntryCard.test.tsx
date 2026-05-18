@@ -57,4 +57,31 @@ describe('EntryCard', () => {
     render(<EntryCard entry={entry} />);
     expect(screen.getByText('⭐ 17')).toBeInTheDocument();
   });
+
+  it('renders SVG composition when aiResult is null', () => {
+    const entry = { ...makeEntry(), aiResult: null };
+    const { container } = render(<EntryCard entry={entry} />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(container.querySelector('img')).not.toBeInTheDocument();
+  });
+
+  it('renders AI result image instead of SVG when aiResult.dataUrl is set', () => {
+    const entry = {
+      ...makeEntry(),
+      nickname: 'AI 드레스',
+      aiResult: {
+        dataUrl: 'data:image/png;base64,abc123',
+        generatedAt: Date.now(),
+        modelId: 'gemini',
+        paramsHash: 'hash',
+        prompt: 'test prompt',
+      },
+    };
+    const { container } = render(<EntryCard entry={entry} />);
+    const img = container.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img?.getAttribute('src')).toBe('data:image/png;base64,abc123');
+    expect(img?.getAttribute('alt')).toBe('AI 드레스');
+    expect(container.querySelector('svg')).not.toBeInTheDocument();
+  });
 });

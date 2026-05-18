@@ -66,8 +66,16 @@ export function SummaryDetailModal({ entry, onClose }: Props) {
           {entry.nickname || '이름 없음'}
         </h2>
 
-        {/* Dress canvas */}
-        {meta?.basePhoto && (
+        {/* Visual: AI image takes priority; fallback to DressCanvas */}
+        {entry.aiResult?.dataUrl ? (
+          <div className="w-48 mx-auto">
+            <img
+              src={entry.aiResult.dataUrl}
+              alt={entry.nickname || '이름 없음'}
+              className="w-full object-cover rounded"
+            />
+          </div>
+        ) : meta?.basePhoto && (
           <div className="w-48 mx-auto">
             <DressCanvas
               photo={meta.basePhoto}

@@ -134,4 +134,24 @@ describe('SummaryDetailModal', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(onClose).toHaveBeenCalledOnce();
   });
+
+  it('renders AI result image instead of DressCanvas when aiResult is set', () => {
+    useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
+    const entry = {
+      ...makeEntry(),
+      aiResult: {
+        dataUrl: 'data:image/png;base64,aidata',
+        generatedAt: Date.now(),
+        modelId: 'gemini',
+        paramsHash: 'hash',
+        prompt: 'test',
+      },
+    };
+    const { container } = render(<SummaryDetailModal entry={entry} onClose={vi.fn()} />);
+    const img = container.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img?.getAttribute('src')).toBe('data:image/png;base64,aidata');
+    // DressCanvas renders a canvas; it should not be present when aiResult is set
+    expect(container.querySelector('canvas')).not.toBeInTheDocument();
+  });
 });
