@@ -29,6 +29,7 @@
     "eslint": "^9.25.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
