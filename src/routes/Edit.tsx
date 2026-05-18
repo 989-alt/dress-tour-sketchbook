@@ -17,9 +17,10 @@ import { SleevePanel } from '../components/panels/SleevePanel';
 import { BodicePanel } from '../components/panels/BodicePanel';
 import { BackPanel } from '../components/panels/BackPanel';
 import { FabricPanel } from '../components/panels/FabricPanel';
+import { ColorPanel } from '../components/panels/ColorPanel';
 import type { SketchOverlayHandle } from '../components/SketchOverlay';
 
-type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'back' | 'fabric' | 'anchor' | 'pen' | 'meta';
+type TabId = 'basic' | 'silhouette' | 'neckline' | 'sleeve' | 'bodice' | 'back' | 'fabric' | 'color' | 'anchor' | 'pen' | 'meta';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'basic', label: '기본' },
@@ -29,6 +30,7 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'bodice', label: '보디스' },
   { id: 'back', label: '등판' },
   { id: 'fabric', label: '원단' },
+  { id: 'color', label: '컬러' },
   { id: 'anchor', label: '앵커' },
   { id: 'pen', label: '펜' },
   { id: 'meta', label: '메모' },
@@ -205,6 +207,13 @@ export default function Edit() {
           <FabricPanel
             value={currentEntry.fabric}
             onChange={(f) => handleEntryChange({ fabric: f })}
+          />
+        );
+      case 'color':
+        return (
+          <ColorPanel
+            value={currentEntry.color}
+            onChange={(c) => handleEntryChange({ color: c })}
           />
         );
       case 'anchor':

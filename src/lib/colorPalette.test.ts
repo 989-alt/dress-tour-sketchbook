@@ -1,5 +1,43 @@
 import { describe, it, expect } from 'vitest';
-import { adjustLightness, COLOR_HEX } from './colorPalette';
+import { adjustLightness, COLOR_HEX, COLOR_LABELS } from './colorPalette';
+import type { ColorEnum } from '../types';
+
+const ALL_COLORS: ColorEnum[] = [
+  'pureWhite', 'offWhite', 'ivory', 'champagne', 'blush',
+  'gold', 'grey', 'blue', 'black',
+];
+
+describe('COLOR_LABELS', () => {
+  it('has exactly 9 entries', () => {
+    expect(Object.keys(COLOR_LABELS)).toHaveLength(9);
+  });
+
+  it('has an entry for every ColorEnum value', () => {
+    for (const color of ALL_COLORS) {
+      expect(COLOR_LABELS[color]).toBeDefined();
+    }
+  });
+
+  it('all labels are non-empty Korean strings', () => {
+    for (const color of ALL_COLORS) {
+      const label = COLOR_LABELS[color];
+      expect(typeof label).toBe('string');
+      expect(label.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('specific Korean labels are correct', () => {
+    expect(COLOR_LABELS.pureWhite).toBe('순백');
+    expect(COLOR_LABELS.offWhite).toBe('오프 화이트');
+    expect(COLOR_LABELS.ivory).toBe('아이보리');
+    expect(COLOR_LABELS.champagne).toBe('샴페인');
+    expect(COLOR_LABELS.blush).toBe('블러쉬');
+    expect(COLOR_LABELS.gold).toBe('골드');
+    expect(COLOR_LABELS.grey).toBe('그레이');
+    expect(COLOR_LABELS.blue).toBe('블루');
+    expect(COLOR_LABELS.black).toBe('블랙');
+  });
+});
 
 describe('adjustLightness', () => {
   it('returns a 7-char hex string', () => {

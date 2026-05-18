@@ -597,3 +597,89 @@ describe('composeDress — fabric defs (T15)', () => {
     expect(html).toContain('id="p1-fabric-satin-pureWhite"');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Test 16 (T16): Ombre gradient
+// ---------------------------------------------------------------------------
+describe('composeDress — ombre gradient (T16)', () => {
+  it('renders a linearGradient def when gradient=ombre and secondary is set', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t16-ombre', anchors);
+    entry.color.gradient = 'ombre';
+    entry.color.secondary = 'blush';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+
+    expect(html).toContain('<linearGradient');
+    expect(html).toContain('ombre-pureWhite-blush');
+  });
+
+  it('ombre gradient uses primary color as first stop and secondary as last stop', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t16-stops', anchors);
+    entry.color.primary = 'ivory';
+    entry.color.gradient = 'ombre';
+    entry.color.secondary = 'blush';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+
+    expect(html).toContain(COLOR_HEX.ivory);
+    expect(html).toContain(COLOR_HEX.blush);
+    // Vertical gradient: x1=0 y1=0 x2=0 y2=1
+    expect(html).toContain('x1="0"');
+    expect(html).toContain('y2="1"');
+  });
+
+  it('silhouette fill uses url(#ombre-...) when gradient=ombre', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t16-fill', anchors);
+    entry.color.gradient = 'ombre';
+    entry.color.secondary = 'champagne';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+
+    expect(html).toContain('url(#ombre-pureWhite-champagne)');
+  });
+
+  it('silhouette fill uses fabric url (not ombre) when gradient=solid', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t16-solid', anchors);
+    entry.color.gradient = 'solid';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+
+    expect(html).not.toContain('url(#ombre-');
+    expect(html).toContain('url(#fabric-');
+  });
+
+  it('no ombre gradient id rendered when gradient=solid', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t16-no-grad', anchors);
+    entry.color.gradient = 'solid';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+
+    // No ombre-specific gradient id should appear
+    expect(html).not.toContain('id="ombre-');
+  });
+
+  it('idPrefix is included in ombre gradient id', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t16-prefix', anchors);
+    entry.color.gradient = 'ombre';
+    entry.color.secondary = 'gold';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, { ...DEFAULT_OPTIONS, idPrefix: 'x-' }));
+
+    expect(html).toContain('id="x-ombre-pureWhite-gold"');
+    expect(html).toContain('url(#x-ombre-pureWhite-gold)');
+  });
+
+  it('ombre renders without throwing for all 9 silhouettes', () => {
+    const ALL_SIL: SilhouetteType[] = ['aline', 'mermaid', 'trumpet', 'princess', 'sheath', 'empire', 'fitFlare', 'tealength', 'mini'];
+    for (const sil of ALL_SIL) {
+      const anchors = anchorSetFromRef(sil);
+      const entry = createDefaultEntry(`t16-sil-${sil}`, anchors);
+      (entry as { silhouette: SilhouetteType }).silhouette = sil;
+      entry.color.gradient = 'ombre';
+      entry.color.secondary = 'blush';
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});

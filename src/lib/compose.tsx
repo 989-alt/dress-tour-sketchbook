@@ -44,6 +44,11 @@ function renderFabricDefs(entry: DressEntry, idPrefix: string): ReactElement[] {
   );
 }
 
+/** Build the SVG def id for an ombre gradient. */
+function ombreDefId(idPrefix: string, primary: ColorEnum, secondary: ColorEnum): string {
+  return `${idPrefix}ombre-${primary}-${secondary}`;
+}
+
 /** Render the 12 warped silhouette triangles as clipPath+g pairs. */
 function renderSilhouette(
   entry: DressEntry,
@@ -52,7 +57,12 @@ function renderSilhouette(
 ): ReactElement {
   const def = SILHOUETTES[entry.silhouette];
   const warps = meshWarp(def.referencePose, entry.anchors ?? anchors);
-  const fill = `url(#${fabricDefId(idPrefix, entry.fabric.bodice, entry.color.primary)})`;
+
+  const isOmbre = entry.color.gradient === 'ombre' && !!entry.color.secondary;
+  // NOTE: ombre overrides fabric for v1; fabric+ombre combo is not supported.
+  const fill = isOmbre
+    ? `url(#${ombreDefId(idPrefix, entry.color.primary, entry.color.secondary!)})`
+    : `url(#${fabricDefId(idPrefix, entry.fabric.bodice, entry.color.primary)})`;
 
   const clipPaths = warps.map((w, idx) => {
     const [p0, p1, p2] = w.clipTriangleInSrcSpace;
@@ -78,9 +88,23 @@ function renderSilhouette(
     </g>
   ));
 
+  // T16: ombre gradient def
+  const ombreDef = isOmbre ? (
+    <linearGradient
+      id={ombreDefId(idPrefix, entry.color.primary, entry.color.secondary!)}
+      x1="0" y1="0" x2="0" y2="1"
+    >
+      <stop offset="0" stopColor={COLOR_HEX[entry.color.primary]} />
+      <stop offset="1" stopColor={COLOR_HEX[entry.color.secondary!]} />
+    </linearGradient>
+  ) : null;
+
   return (
     <>
-      <defs>{clipPaths}</defs>
+      <defs>
+        {ombreDef}
+        {clipPaths}
+      </defs>
       <g style={{ opacity: entry.opacity }}>{groups}</g>
     </>
   );

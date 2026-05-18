@@ -12,6 +12,18 @@ export const COLOR_HEX: Record<ColorEnum, string> = {
   black:      '#222222',
 };
 
+export const COLOR_LABELS: Record<ColorEnum, string> = {
+  pureWhite:  '순백',
+  offWhite:   '오프 화이트',
+  ivory:      '아이보리',
+  champagne:  '샴페인',
+  blush:      '블러쉬',
+  gold:       '골드',
+  grey:       '그레이',
+  blue:       '블루',
+  black:      '블랙',
+};
+
 /**
  * Adjust the lightness of a hex color.
  * @param hex  6-digit hex string, e.g. '#f4d8d4'
