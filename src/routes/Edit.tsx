@@ -425,156 +425,183 @@ export default function Edit() {
   const canGenerate = !!meta?.basePhoto && !generating;
   const hasAiResult = !!currentEntry.aiResult;
 
+  const showCanvas = activeTab === 'pen' || activeTab === 'anchor' || !!currentEntry.aiResult;
+
   return (
-    <div className="flex flex-col h-screen bg-cream-100">
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-cream-50/80 backdrop-blur border-b border-ink-100/60 shrink-0">
-        <div className="px-4 py-2 flex items-center gap-3 flex-wrap">
+    <div className="min-h-screen bg-cream-100">
+      {/* Sticky header */}
+      <header className="sticky top-0 z-40 bg-cream-50/80 backdrop-blur border-b border-ink-100/60">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
-            className="btn-ghost p-1 -ml-1 text-xl leading-none"
+            className="btn-ghost p-2 -ml-2 rounded-lg"
             aria-label="뒤로"
           >
             ←
           </button>
-          <h1 className="flex-1 text-sm font-semibold text-ink-900 truncate">{title}</h1>
-          <span className="text-xs text-ink-400">{saving ? '저장 중…' : '저장됨'}</span>
+          <div className="min-w-0 flex-1">
+            <h1 className="font-semibold text-ink-900 truncate text-base">{title}</h1>
+            <p className="text-xs text-ink-400">{saving ? '저장 중…' : '저장됨'}</p>
+          </div>
           {isStale && (
-            <span className="text-xs text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full" aria-label="변경됨 표시">변경됨</span>
+            <span className="hidden sm:inline text-[11px] text-rose-600 bg-rose-50 px-2 py-1 rounded-full font-medium" aria-label="변경됨 표시">변경됨</span>
           )}
-          {generating ? (
-            <button
-              onClick={handleCancelGenerate}
-              aria-label="AI 합성 취소"
-              className="text-xs px-3 py-1.5 rounded-xl border border-rose-300 bg-rose-50 text-rose-600 hover:bg-rose-100"
-            >
-              생성 중… (취소)
-            </button>
-          ) : hasAiResult ? (
-            <>
+          <div className="flex items-center gap-2">
+            {generating ? (
               <button
-                onClick={() => void handleGenerate(true)}
-                disabled={!canGenerate}
-                aria-label="이어서 다듬기"
-                className="btn-primary text-xs py-1.5 px-3 disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={handleCancelGenerate}
+                aria-label="AI 합성 취소"
+                className="text-xs px-3 py-1.5 rounded-xl border border-rose-300 bg-rose-50 text-rose-600 hover:bg-rose-100"
               >
-                🔄 이어서 다듬기
+                생성 중… (취소)
               </button>
+            ) : hasAiResult ? (
+              <>
+                <button
+                  onClick={() => void handleGenerate(true)}
+                  disabled={!canGenerate}
+                  aria-label="이어서 다듬기"
+                  className="btn-primary text-xs py-1.5 px-3 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  🔄 이어서 다듬기
+                </button>
+                <button
+                  onClick={() => void handleGenerate(false)}
+                  disabled={!canGenerate}
+                  aria-label="처음부터 다시 합성"
+                  className="text-xs px-3 py-1.5 rounded-xl border border-ink-100/60 text-ink-400 hover:bg-cream-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ↻ 처음부터
+                </button>
+              </>
+            ) : (
               <button
                 onClick={() => void handleGenerate(false)}
                 disabled={!canGenerate}
-                aria-label="처음부터 다시 합성"
-                className="text-xs px-3 py-1.5 rounded-xl border border-ink-100/60 text-ink-400 hover:bg-cream-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="AI 합성 시작"
+                className="btn-primary text-xs py-1.5 px-3 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                ↻ 처음부터
+                ✨ AI 합성
               </button>
-            </>
-          ) : (
-            <button
-              onClick={() => void handleGenerate(false)}
-              disabled={!canGenerate}
-              aria-label="AI 합성 시작"
-              className="btn-primary text-xs py-1.5 px-3 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              ✨ AI 합성
-            </button>
-          )}
-          {currentEntry.aiResult && (
-            <button
-              onClick={() => void handleDownloadPng()}
-              aria-label="PNG 다운로드"
-              className="text-xs px-3 py-1.5 rounded-xl border border-ink-100/60 text-ink-400 hover:bg-cream-100"
-            >
-              📥 PNG
-            </button>
-          )}
+            )}
+            {currentEntry.aiResult && (
+              <button
+                onClick={() => void handleDownloadPng()}
+                aria-label="PNG 다운로드"
+                className="text-xs px-3 py-1.5 rounded-xl border border-ink-100/60 text-ink-400 hover:bg-cream-100"
+              >
+                📥 PNG
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Main area */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: canvas ~60% */}
-        <div className="w-3/5 flex items-start justify-center overflow-auto bg-cream-200 p-2">
-          <DressCanvas
-            photo={meta.basePhoto}
-            photoWidth={dims.w}
-            photoHeight={dims.h}
-            entry={currentEntry}
-            anchors={currentAnchors}
-            showAnchors={activeTab === 'anchor'}
-            showSketch={activeTab === 'pen'}
-            manualMode={manualMode}
-            onAnchorChange={handleAnchorChange}
-            aiResultDataUrl={currentEntry.aiResult?.dataUrl ?? null}
-            className="max-w-full"
-            sketchRef={sketchRef}
-            savedRegions={currentEntry.regionPrompts ?? []}
-            sketchBrushSize={brushSize}
-            sketchColor={penColor}
-            sketchAcceptFinger={acceptFinger}
-          />
+      {/* Stacked main content */}
+      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 space-y-6">
+        {/* AI 합성 옵션 card */}
+        <section className="card p-6" aria-label="ai-section">
+          <p className="label-caps mb-3">AI 합성 옵션</p>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              {currentEntry.referenceDress ? (
+                <div className="flex items-center gap-3 flex-1">
+                  <img
+                    src={currentEntry.referenceDress.dataUrl}
+                    alt="참고 드레스"
+                    className="w-16 h-20 object-cover rounded-lg ring-1 ring-ink-100"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-ink-900">레퍼런스 드레스</p>
+                    <p className="text-xs text-ink-400">합성 시 참조 디자인으로 사용됩니다</p>
+                  </div>
+                  <button
+                    onClick={handleClearReferenceDress}
+                    aria-label="참고 드레스 제거"
+                    className="btn-ghost text-xs"
+                  >
+                    제거
+                  </button>
+                </div>
+              ) : (
+                <label
+                  className="flex-1 py-3 px-4 border-2 border-dashed border-rose-200 hover:border-rose-300 hover:bg-rose-50/50 text-rose-500 rounded-xl text-sm font-medium text-center transition-colors cursor-pointer"
+                  aria-label="참고 드레스 업로드"
+                >
+                  + 레퍼런스 드레스 사진 (선택)
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleReferenceDressUpload(file);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+
+            <textarea
+              value={extraPrompt}
+              onChange={(e) => setExtraPrompt(e.target.value)}
+              placeholder="레이스 더 풍성하게, 소매 짧게, 약간 빈티지 느낌…"
+              rows={3}
+              aria-label="추가 지시사항"
+              className="w-full bg-cream-50 border border-ink-100/60 rounded-xl px-4 py-3 text-sm placeholder:text-ink-400/70 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300 resize-none"
+            />
+
+            {generateError && (
+              <div className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-3" role="alert">
+                {generateError}
+              </div>
+            )}
+
+            {hasAiResult && (
+              <p className="text-xs text-ink-400 text-center">
+                ↺ 이어서 다듬기는 기존 결과의 디테일을 유지하며 변경 사항만 반영합니다.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Canvas card */}
+        <div className="card overflow-hidden">
+          {showCanvas ? (
+            <DressCanvas
+              photo={meta.basePhoto}
+              photoWidth={dims.w}
+              photoHeight={dims.h}
+              entry={currentEntry}
+              anchors={currentAnchors}
+              showAnchors={activeTab === 'anchor'}
+              showSketch={activeTab === 'pen'}
+              manualMode={manualMode}
+              onAnchorChange={handleAnchorChange}
+              aiResultDataUrl={currentEntry.aiResult?.dataUrl ?? null}
+              className="w-full"
+              sketchRef={sketchRef}
+              savedRegions={currentEntry.regionPrompts ?? []}
+              sketchBrushSize={brushSize}
+              sketchColor={penColor}
+              sketchAcceptFinger={acceptFinger}
+            />
+          ) : (
+            <div className="relative aspect-[3/4] bg-cream-50 flex items-center justify-center">
+              <div className="relative z-10 text-center p-8 bg-white/90 rounded-2xl shadow-paper backdrop-blur-sm max-w-xs mx-auto">
+                <p className="text-base font-semibold text-ink-900 mb-2">아직 합성 전이에요</p>
+                <p className="text-sm text-ink-400 leading-relaxed">
+                  파라미터를 조정한 다음 상단의<br />
+                  <span className="text-rose-500 font-medium">✨ AI 합성</span> 버튼을 눌러보세요.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right: panels ~40% */}
-        <div className="w-2/5 border-l border-ink-100/60 flex flex-col bg-cream-50" aria-label="parameter-panel-area">
-          {/* AI 합성 옵션 section */}
-          <div className="shrink-0 border-b border-ink-100/60 px-3 py-2 bg-cream-50" aria-label="ai-section">
-            {generateError && (
-              <p className="text-xs text-rose-500 mb-1" role="alert">{generateError}</p>
-            )}
-            {hasAiResult && (
-              <p className="text-[10px] text-ink-400 mb-1">기존 결과의 디테일을 유지하며 변경 사항만 반영합니다.</p>
-            )}
-            <div className="flex gap-2 items-start">
-              {/* Reference dress upload */}
-              <div className="shrink-0">
-                {currentEntry.referenceDress ? (
-                  <div className="relative w-12 h-12">
-                    <img
-                      src={currentEntry.referenceDress.dataUrl}
-                      alt="참고 드레스"
-                      className="w-12 h-12 object-cover rounded-xl border border-ink-100/60"
-                    />
-                    <button
-                      onClick={handleClearReferenceDress}
-                      aria-label="참고 드레스 제거"
-                      className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-xs leading-none flex items-center justify-center"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : (
-                  <label
-                    className="flex flex-col items-center justify-center w-12 h-12 border-2 border-dashed border-rose-200 rounded-xl cursor-pointer text-rose-400 hover:border-rose-300 hover:bg-rose-50/50 transition-colors"
-                    aria-label="참고 드레스 업로드"
-                  >
-                    <span className="text-lg leading-none">+</span>
-                    <span className="text-[9px]">참고</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="sr-only"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleReferenceDressUpload(file);
-                        e.target.value = '';
-                      }}
-                    />
-                  </label>
-                )}
-              </div>
-              {/* Extra instructions textarea */}
-              <textarea
-                value={extraPrompt}
-                onChange={(e) => setExtraPrompt(e.target.value)}
-                placeholder="레이스 더 풍성하게, 소매 짧게, 약간 빈티지 느낌..."
-                rows={2}
-                aria-label="추가 지시사항"
-                className="flex-1 text-xs bg-cream-50 border border-ink-100/60 rounded-xl px-2 py-1 resize-none focus:outline-none focus:ring-2 focus:ring-rose-200"
-              />
-            </div>
-          </div>
-
+        {/* Parameter panel area */}
+        <div aria-label="parameter-panel-area">
           <ParameterPanel
             tabs={sortedTabs}
             activeId={activeTab}
@@ -582,10 +609,12 @@ export default function Edit() {
             pinnedTabIds={pinnedTabs}
             onPinToggle={handlePinToggle}
           >
-            {renderPanel()}
+            <div className="card p-6 sm:p-8">
+              {renderPanel()}
+            </div>
           </ParameterPanel>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

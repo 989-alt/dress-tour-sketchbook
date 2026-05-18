@@ -102,7 +102,7 @@ export default function Summary() {
     <div className="min-h-screen flex flex-col bg-cream-100">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-cream-50/80 backdrop-blur border-b border-ink-100/60 shrink-0">
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="mx-auto max-w-5xl flex items-center gap-3 px-4 py-3">
           <button
             onClick={() => navigate('/')}
             className="btn-ghost p-1 -ml-1 text-xl leading-none"
@@ -153,52 +153,63 @@ export default function Summary() {
         </div>
       )}
 
-      <main className="flex-1 overflow-auto px-4 py-4 space-y-4">
-        {/* Sort selector */}
-        <div className="flex items-center gap-2">
-          <label className="label-caps" htmlFor="sort-select">
-            정렬
-          </label>
-          <select
-            id="sort-select"
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="text-sm bg-cream-50 border border-ink-100/60 rounded-xl px-2 py-1"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Entry grid */}
-        {sorted.length === 0 ? (
-          <p className="text-sm text-ink-400 text-center py-12">아직 드레스가 없습니다.</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {sorted.map((entry) => {
-              const isSelected = compareSelecting.some((e) => e.id === entry.id);
-              return (
-                <div
-                  key={entry.id}
-                  className={[
-                    'relative',
-                    compareMode && isSelected ? 'ring-2 ring-rose-400 rounded-2xl' : '',
-                  ].join(' ')}
-                >
-                  <EntryCard entry={entry} onClick={() => handleCardClick(entry)} />
-                  {compareMode && isSelected && (
-                    <span className="absolute top-1 right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {compareSelecting.findIndex((e) => e.id === entry.id) + 1}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+      <main className="flex-1 overflow-auto px-4 py-4">
+        <div className="mx-auto max-w-5xl space-y-4">
+          {/* Sort selector */}
+          <div className="flex items-center gap-2">
+            <label className="label-caps" htmlFor="sort-select">
+              정렬
+            </label>
+            <select
+              id="sort-select"
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as SortKey)}
+              className="text-sm bg-cream-50 border border-ink-100/60 rounded-xl px-2 py-1"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
+
+          {/* Entry grid */}
+          {sorted.length === 0 ? (
+            <div className="mx-auto max-w-2xl py-12">
+              <div className="card p-12 text-center">
+                <div className="text-4xl mb-4">🤍</div>
+                <p className="font-medium text-ink-900 mb-1">아직 드레스가 없어요</p>
+                <p className="text-sm text-ink-400">홈에서 새 드레스를 추가해 보세요.</p>
+                <button onClick={() => navigate('/')} className="btn-primary mt-6 text-sm">
+                  홈으로
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {sorted.map((entry) => {
+                const isSelected = compareSelecting.some((e) => e.id === entry.id);
+                return (
+                  <div
+                    key={entry.id}
+                    className={[
+                      'relative',
+                      compareMode && isSelected ? 'ring-2 ring-rose-400 rounded-2xl' : '',
+                    ].join(' ')}
+                  >
+                    <EntryCard entry={entry} onClick={() => handleCardClick(entry)} />
+                    {compareMode && isSelected && (
+                      <span className="absolute top-1 right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {compareSelecting.findIndex((e) => e.id === entry.id) + 1}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Footer */}

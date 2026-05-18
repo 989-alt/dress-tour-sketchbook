@@ -109,7 +109,7 @@ describe('Summary route', () => {
   it('shows empty state message when no entries', () => {
     useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
     renderSummary();
-    expect(screen.getByText('아직 드레스가 없습니다.')).toBeInTheDocument();
+    expect(screen.getByText('아직 드레스가 없어요')).toBeInTheDocument();
   });
 
   it('clicking an EntryCard opens the detail modal', () => {
