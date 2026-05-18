@@ -1,28 +1,103 @@
-export type SilhouetteType = 'aline' | 'mermaid' | 'trumpet' | 'princess' | 'sheath' | 'empire' | 'fitFlare' | 'tealength' | 'mini';
+export type SilhouetteType =
+  | 'aline'
+  | 'mermaid'
+  | 'trumpet'
+  | 'princess'
+  | 'sheath'
+  | 'empire'
+  | 'fitFlare'
+  | 'tealength'
+  | 'mini';
 
-export type NecklineType = 'sweetheart' | 'vRegular' | 'vDeep' | 'vPlunging' | 'halter' | 'offShoulder' | 'oneShoulder' | 'strapless' | 'boat' | 'illusionCrew' | 'square' | 'scoop' | 'portrait' | 'highNeck' | 'keyhole';
+export type NecklineType =
+  | 'sweetheart'
+  | 'vRegular'
+  | 'vDeep'
+  | 'vPlunging'
+  | 'halter'
+  | 'offShoulder'
+  | 'oneShoulder'
+  | 'strapless'
+  | 'boat'
+  | 'illusionCrew'
+  | 'square'
+  | 'scoop'
+  | 'portrait'
+  | 'highNeck'
+  | 'keyhole';
 
-export type SleeveType = 'sleeveless' | 'cap' | 'short' | 'threeQuarter' | 'long' | 'bishop' | 'puff' | 'bell' | 'legOfMutton' | 'illusion';
+export type SleeveType =
+  | 'sleeveless'
+  | 'cap'
+  | 'short'
+  | 'threeQuarter'
+  | 'long'
+  | 'bishop'
+  | 'puff'
+  | 'bell'
+  | 'legOfMutton'
+  | 'illusion';
 export type SleeveMaterial = 'opaque' | 'sheer' | 'lace' | 'beaded';
 
 export type WaistPosition = 'natural' | 'empire' | 'basque' | 'drop' | 'asymmetric';
 export type BodiceStructure = 'corset' | 'softFit' | 'peplum' | 'mockPeplum';
 export type WaistAccent = 'none' | 'sash' | 'ribbon' | 'brooch' | 'beadedBand';
 
-export type BackType = 'closed' | 'vBack' | 'illusionBack' | 'openBack' | 'keyhole' | 'buttonRow' | 'laceUpCorset' | 'drape';
+export type BackType =
+  | 'closed'
+  | 'vBack'
+  | 'illusionBack'
+  | 'openBack'
+  | 'keyhole'
+  | 'buttonRow'
+  | 'laceUpCorset'
+  | 'drape';
 
-export type SkirtTexture = 'smooth' | 'gathered' | 'pleated' | 'tiered' | 'layeredTulle' | 'ruffled' | 'ruched' | 'asymmetricDrape';
+export type SkirtTexture =
+  | 'smooth'
+  | 'gathered'
+  | 'pleated'
+  | 'tiered'
+  | 'layeredTulle'
+  | 'ruffled'
+  | 'ruched'
+  | 'asymmetricDrape';
 export type SlitType = 'none' | 'side' | 'front';
 export type TrainLength = 'none' | 'sweep' | 'court' | 'chapel' | 'cathedral';
 
 export type FabricType = 'satin' | 'mikado' | 'organza' | 'tulle' | 'lace' | 'chiffon' | 'taffeta';
 
-export type EmbellishmentType = 'beads' | 'laceApplique' | 'threeDFlorals' | 'crystals' | 'pearls' | 'embroidery' | 'sequins' | 'ribbons' | 'decorativeButtons';
+export type EmbellishmentType =
+  | 'beads'
+  | 'laceApplique'
+  | 'threeDFlorals'
+  | 'crystals'
+  | 'pearls'
+  | 'embroidery'
+  | 'sequins'
+  | 'ribbons'
+  | 'decorativeButtons';
 export type Region = 'bodice' | 'waist' | 'skirt' | 'sleeves' | 'train' | 'allover';
 
-export type ColorEnum = 'pureWhite' | 'offWhite' | 'ivory' | 'champagne' | 'blush' | 'gold' | 'grey' | 'blue' | 'black';
+export type ColorEnum =
+  | 'pureWhite'
+  | 'offWhite'
+  | 'ivory'
+  | 'champagne'
+  | 'blush'
+  | 'gold'
+  | 'grey'
+  | 'blue'
+  | 'black';
 
-export type VeilLength = 'none' | 'blusher' | 'elbow' | 'fingertip' | 'waltz' | 'chapel' | 'cathedral';
+export type VeilLength =
+  | 'none'
+  | 'blusher'
+  | 'elbow'
+  | 'fingertip'
+  | 'waltz'
+  | 'chapel'
+  | 'cathedral';
 export type VeilEdge = 'cut' | 'ribbon' | 'beaded' | 'lace';
 
 export type AccessoryType = 'none' | 'tiara' | 'headband' | 'hairVine' | 'hairComb' | 'floralCrown';
@@ -104,6 +179,7 @@ export interface DressEntry {
   veil: { length: VeilLength; edge: VeilEdge; layers: 1 | 2 } | null;
   accessory: AccessoryType;
 
+  /** 0..1 inclusive */
   opacity: number;
   sketchPng: string | null;
 

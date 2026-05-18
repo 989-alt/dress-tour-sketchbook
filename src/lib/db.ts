@@ -48,7 +48,7 @@ export async function listEntries(): Promise<DressEntry[]> {
   const db = await getDb();
   // Use the index to get all entries sorted by createdAt ascending, then reverse for desc
   const entries = (await db.getAllFromIndex(ENTRIES_STORE, 'by-createdAt')) as DressEntry[];
-  return entries.reverse();
+  return [...entries].reverse();
 }
 
 export async function getEntry(id: string): Promise<DressEntry | undefined> {
@@ -66,6 +66,13 @@ export async function removeEntry(id: string): Promise<void> {
   await db.delete(ENTRIES_STORE, id);
 }
 
+/**
+ * Clears all object stores AND drops the cached DB connection so that
+ * subsequent operations reopen the database from scratch. This double
+ * reset is intentional: test suites rely on it for full isolation
+ * (each test gets a clean DB), and it also ensures production callers
+ * that invoke clearAll see a consistent empty state on the next open.
+ */
 export async function clearAll(): Promise<void> {
   const db = await getDb();
   await db.clear(META_STORE);

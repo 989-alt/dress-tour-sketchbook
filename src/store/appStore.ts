@@ -14,15 +14,22 @@ interface AppStore {
   removeEntry(id: string): Promise<void>;
 }
 
+let hydratePromise: Promise<void> | null = null;
+
 export const useAppStore = create<AppStore>((set, get) => ({
   meta: null,
   entries: [],
   hydrated: false,
 
-  async hydrate() {
-    if (get().hydrated) return;
-    const [meta, entries] = await Promise.all([db.getMeta(), db.listEntries()]);
-    set({ meta: meta ?? null, entries, hydrated: true });
+  hydrate(): Promise<void> {
+    if (get().hydrated) return Promise.resolve();
+    if (!hydratePromise) {
+      hydratePromise = Promise.all([db.getMeta(), db.listEntries()])
+        .then(([meta, entries]) => {
+          set({ meta: meta ?? null, entries, hydrated: true });
+        });
+    }
+    return hydratePromise;
   },
 
   async setMeta(meta: AppMeta | null) {
