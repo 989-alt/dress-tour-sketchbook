@@ -17,6 +17,8 @@ export interface DressCanvasProps {
   onSketchChange?: (sketchPng: string | null) => void;
   manualMode?: boolean;
   className?: string;
+  /** When set, the AI-generated image replaces the photo + SVG composition. */
+  aiResultDataUrl?: string | null;
 }
 
 export function DressCanvas({
@@ -32,6 +34,7 @@ export function DressCanvas({
   onSketchChange,
   manualMode = false,
   className,
+  aiResultDataUrl,
 }: DressCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [objectURL, setObjectURL] = useState<string | null>(null);
@@ -79,12 +82,11 @@ export function DressCanvas({
         overflow: 'hidden',
       }}
     >
-      {/* Layer 1: photo */}
-      {objectURL && !loadError && (
+      {aiResultDataUrl ? (
+        /* AI result replaces photo + SVG */
         <img
-          src={objectURL}
-          alt=""
-          onError={() => setLoadError(true)}
+          src={aiResultDataUrl}
+          alt="AI 합성 결과"
           style={{
             position: 'absolute',
             inset: 0,
@@ -94,28 +96,47 @@ export function DressCanvas({
             pointerEvents: 'none',
           }}
         />
-      )}
+      ) : (
+        <>
+          {/* Layer 1: photo */}
+          {objectURL && !loadError && (
+            <img
+              src={objectURL}
+              alt=""
+              onError={() => setLoadError(true)}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'fill',
+                pointerEvents: 'none',
+              }}
+            />
+          )}
 
-      {loadError && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
-            color: '#c0392b',
-          }}
-        >
-          사진을 불러올 수 없습니다
-        </div>
-      )}
+          {loadError && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+                color: '#c0392b',
+              }}
+            >
+              사진을 불러올 수 없습니다
+            </div>
+          )}
 
-      {/* Layer 2: warped dress SVG — viewBox stays at photo coords, width/height = display */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        {scaledSvg}
-      </div>
+          {/* Layer 2: warped dress SVG — viewBox stays at photo coords, width/height = display */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {scaledSvg}
+          </div>
+        </>
+      )}
 
       {/* Layer 3: anchor overlay */}
       {showAnchors && (
