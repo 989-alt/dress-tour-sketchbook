@@ -25,8 +25,10 @@ export default function App() {
     return <LoadingFallback />;
   }
 
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<Home />} />
