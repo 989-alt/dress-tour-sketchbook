@@ -102,6 +102,23 @@ export type VeilEdge = 'cut' | 'ribbon' | 'beaded' | 'lace';
 
 export type AccessoryType = 'none' | 'tiara' | 'headband' | 'hairVine' | 'hairComb' | 'floralCrown';
 
+export interface AIResult {
+  /** data: URL of generated PNG (or JPEG/WebP — whatever the API returned) */
+  dataUrl: string;
+  generatedAt: number;
+  modelId: string;
+  /** Snapshot of which params were used to generate, for the "needs regenerate" indicator. */
+  paramsHash: string;
+  /** The prompt that was sent (for debugging / regeneration consistency). */
+  prompt: string;
+}
+
+export interface ReferenceDress {
+  /** data: URL of the user-uploaded reference dress image */
+  dataUrl: string;
+  uploadedAt: number;
+}
+
 export interface Point { x: number; y: number; }
 
 export interface PoseLandmark { x: number; y: number; visibility: number; }
@@ -179,6 +196,9 @@ export interface DressEntry {
   veil: { length: VeilLength; edge: VeilEdge; layers: 1 | 2 } | null;
   accessory: AccessoryType;
 
+  aiResult: AIResult | null;
+  referenceDress: ReferenceDress | null;
+
   /** 0..1 inclusive */
   opacity: number;
   sketchPng: string | null;
@@ -238,6 +258,9 @@ export function createDefaultEntry(id: string, anchors: AnchorSet): DressEntry {
     color: { primary: 'pureWhite', gradient: 'solid', accent: 'pureWhite' },
     veil: null,
     accessory: 'none',
+
+    aiResult: null,
+    referenceDress: null,
 
     opacity: 1.0,
     sketchPng: null,
