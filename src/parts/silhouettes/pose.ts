@@ -36,42 +36,52 @@ export function standardRegions(
   return [
     {
       name: 'bodice' as const,
-      polygon: [
-        { x: 140, y: 120 },
-        { x: 260, y: 120 },
-        { x: 245, y: 400 },
-        { x: 155, y: 400 },
+      polygons: [
+        [
+          { x: 140, y: 120 },
+          { x: 260, y: 120 },
+          { x: 245, y: 400 },
+          { x: 155, y: 400 },
+        ],
       ],
     },
     {
       name: 'waist' as const,
-      polygon: [
-        { x: 155, y: 380 },
-        { x: 245, y: 380 },
-        { x: 245, y: 420 },
-        { x: 155, y: 420 },
+      polygons: [
+        [
+          { x: 155, y: 380 },
+          { x: 245, y: 380 },
+          { x: 245, y: 420 },
+          { x: 155, y: 420 },
+        ],
       ],
     },
     {
       name: 'skirt' as const,
-      polygon: [
-        { x: 155, y: 400 },
-        { x: 245, y: 400 },
-        skirtBR,
-        skirtBL,
+      polygons: [
+        [
+          { x: 155, y: 400 },
+          { x: 245, y: 400 },
+          skirtBR,
+          skirtBL,
+        ],
       ],
     },
     {
       name: 'sleeves' as const,
-      polygon: [
-        { x: 100, y: 110 },
-        { x: 140, y: 110 },
-        { x: 145, y: 300 },
-        { x: 100, y: 300 },
-        { x: 260, y: 110 },
-        { x: 300, y: 110 },
-        { x: 300, y: 300 },
-        { x: 255, y: 300 },
+      polygons: [
+        [
+          { x: 100, y: 110 },
+          { x: 140, y: 110 },
+          { x: 145, y: 300 },
+          { x: 100, y: 300 },
+        ],
+        [
+          { x: 260, y: 110 },
+          { x: 300, y: 110 },
+          { x: 300, y: 300 },
+          { x: 255, y: 300 },
+        ],
       ],
     },
   ];

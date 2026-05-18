@@ -59,7 +59,19 @@ describe.each(ALL_TYPES)('silhouette: %s', (type) => {
 
   it('each region polygon has at least 3 points', () => {
     for (const region of def.regions) {
-      expect(region.polygon.length).toBeGreaterThanOrEqual(3);
+      for (const polygon of region.polygons) {
+        expect(polygon.length).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
+  it('sleeves region has exactly 2 polygons; all other regions have exactly 1', () => {
+    for (const region of def.regions) {
+      if (region.name === 'sleeves') {
+        expect(region.polygons).toHaveLength(2);
+      } else {
+        expect(region.polygons).toHaveLength(1);
+      }
     }
   });
 
