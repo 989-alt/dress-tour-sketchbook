@@ -41,11 +41,23 @@ export default defineConfig({
         navigateFallback: `${base}index.html`,
         runtimeCaching: [
           {
-            urlPattern: new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}mediapipe-models/`),
+            // MediaPipe WASM bundle from jsdelivr
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/npm\/@mediapipe\/tasks-vision/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mediapipe-wasm',
+              expiration: { maxEntries: 20, maxAgeSeconds: 30 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Pose landmarker model from Google storage
+            urlPattern: /^https:\/\/storage\.googleapis\.com\/mediapipe-models\//,
             handler: 'CacheFirst',
             options: {
               cacheName: 'mediapipe-models',
-              expiration: { maxEntries: 10, maxAgeSeconds: 30 * 24 * 60 * 60 },
+              expiration: { maxEntries: 5, maxAgeSeconds: 30 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],

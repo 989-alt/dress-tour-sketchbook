@@ -48,13 +48,19 @@ export const LANDMARK_NAMES: readonly string[] = [
 // Singleton landmarker — lazy init
 let landmarkerPromise: Promise<PoseLandmarker> | null = null;
 
+// MediaPipe assets loaded from CDNs (jsdelivr for WASM, Google storage for model).
+// Photo data never leaves the browser; only static ML assets are fetched.
+const MEDIAPIPE_WASM_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/wasm';
+const POSE_MODEL_URL =
+  'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+
 function getLandmarker(): Promise<PoseLandmarker> {
   if (!landmarkerPromise) {
     landmarkerPromise = (async () => {
-      const vision = await FilesetResolver.forVisionTasks('/mediapipe-models/wasm');
+      const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL);
       return PoseLandmarker.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: '/mediapipe-models/pose_landmarker_lite.task',
+          modelAssetPath: POSE_MODEL_URL,
           delegate: 'GPU',
         },
         runningMode: 'IMAGE',
