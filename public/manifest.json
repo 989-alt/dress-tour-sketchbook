@@ -1,0 +1,8 @@
+{
+  "name": "Dress Tour Sketchbook",
+  "short_name": "DressTour",
+  "display": "standalone",
+  "lang": "ko",
+  "start_url": "/",
+  "icons": []
+}
