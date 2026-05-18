@@ -1,8 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AnchorOverlay } from './AnchorOverlay';
 import { MESH_ANCHOR_ORDER } from '../lib/warp';
 import type { AnchorSet } from '../types';
+
+// jsdom does not implement pointer capture APIs
+beforeAll(() => {
+  if (!HTMLElement.prototype.setPointerCapture) {
+    HTMLElement.prototype.setPointerCapture = vi.fn();
+    HTMLElement.prototype.releasePointerCapture = vi.fn();
+  }
+});
 
 function makeAnchors(): AnchorSet {
   return {
@@ -70,6 +78,37 @@ describe('AnchorOverlay — click does not crash', () => {
     render(<AnchorOverlay anchors={makeAnchors()} {...BASE_PROPS} onChange={onChange} />);
     const dot = screen.getAllByRole('button')[0];
     expect(() => dot.click()).not.toThrow();
+  });
+});
+
+describe('AnchorOverlay — drag interaction', () => {
+  it('calls onChange with scaled photo coords after pointerdown + pointermove', () => {
+    // photoWidth=400, photoHeight=800, displayWidth=200, displayHeight=400
+    // scaleX = 200/400 = 0.5, scaleY = 400/800 = 0.5
+    // shoulderL at photo (100, 200) → display (50, 100)
+    const anchors: AnchorSet = { ...makeAnchors(), shoulderL: { x: 100, y: 200 } };
+    const onChange = vi.fn();
+    render(
+      <AnchorOverlay
+        anchors={anchors}
+        photoWidth={400}
+        photoHeight={800}
+        displayWidth={200}
+        displayHeight={400}
+        onChange={onChange}
+      />,
+    );
+
+    // getBoundingClientRect returns {left:0,top:0,...} in jsdom by default
+    const dot = screen.getByLabelText('anchor-shoulderL');
+
+    fireEvent.pointerDown(dot, { pointerId: 1, clientX: 50, clientY: 100 });
+    // drag to display (100, 150) → photo coords Math.round(100/0.5)=200, Math.round(150/0.5)=300
+    fireEvent.pointerMove(dot, { pointerId: 1, clientX: 100, clientY: 150, buttons: 1 });
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ shoulderL: { x: 200, y: 300 } }),
+    );
   });
 });
 

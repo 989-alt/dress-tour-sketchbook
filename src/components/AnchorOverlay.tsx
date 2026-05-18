@@ -17,17 +17,11 @@ const MANUAL_ANCHORS = new Set<keyof AnchorSet>([
   'shoulderL', 'shoulderR', 'waist', 'hemL', 'hemR',
 ]);
 
-function dotColor(conf?: number): string {
-  if (conf === undefined) return '#fff';
-  if (conf > 0.7) return '#333';
-  if (conf > 0.4) return '#f5c518';
-  return '#888';
-}
-
-function dotBorder(conf?: number): string {
-  if (conf === undefined || conf > 0.7) return '2px solid #fff';
-  if (conf > 0.4) return '2px solid #f5c518';
-  return '2px solid #888';
+function dotStyle(conf?: number): { background: string; border: string } {
+  if (conf === undefined) return { background: '#fff', border: '2px solid #fff' };
+  if (conf > 0.7) return { background: '#333', border: '2px solid #fff' };
+  if (conf > 0.4) return { background: '#f5c518', border: '2px solid #f5c518' };
+  return { background: '#888', border: '2px solid #888' };
 }
 
 export function AnchorOverlay({
@@ -75,6 +69,7 @@ export function AnchorOverlay({
         const cx = pt.x * scaleX;
         const cy = pt.y * scaleY;
         const conf = confidence?.[key];
+        const ds = dotStyle(conf);
         return (
           <div
             key={key}
@@ -91,8 +86,8 @@ export function AnchorOverlay({
               borderRadius: '50%',
               left: cx - 7,
               top: cy - 7,
-              background: dotColor(conf),
-              border: dotBorder(conf),
+              background: ds.background,
+              border: ds.border,
               cursor: 'grab',
               pointerEvents: 'auto',
               touchAction: 'none',

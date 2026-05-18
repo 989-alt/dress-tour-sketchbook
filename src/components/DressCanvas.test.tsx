@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { DressCanvas } from './DressCanvas';
 import { createDefaultEntry } from '../types';
 import type { AnchorSet } from '../types';
@@ -104,6 +104,24 @@ describe('DressCanvas — showAnchors', () => {
       />,
     );
     expect(screen.getByLabelText('anchor-overlay')).toBeInTheDocument();
+  });
+});
+
+describe('DressCanvas — load error', () => {
+  it('shows Korean error text when img fires an error event', () => {
+    const anchors = makeAnchors();
+    const entry = createDefaultEntry('dc-err', anchors);
+    render(
+      <DressCanvas
+        {...BASE_PROPS}
+        entry={entry}
+        anchors={anchors}
+      />,
+    );
+    const img = document.querySelector('img');
+    expect(img).not.toBeNull();
+    fireEvent.error(img!);
+    expect(screen.getByText('사진을 불러올 수 없습니다')).toBeInTheDocument();
   });
 });
 

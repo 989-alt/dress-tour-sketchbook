@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { cloneElement, useEffect, useRef, useState } from 'react';
 import type { DressEntry, AnchorSet } from '../types';
 import { composeDress } from '../lib/compose';
 import { AnchorOverlay } from './AnchorOverlay';
@@ -66,9 +66,7 @@ export function DressCanvas({
     photoHeight,
     idPrefix: `dc-${entry.id}-`,
   });
-
-  const svgScaleX = displaySize.w / photoWidth;
-  const svgScaleY = displaySize.h / photoHeight;
+  const scaledSvg = cloneElement(dressSvg, { width: displaySize.w, height: displaySize.h });
 
   return (
     <div
@@ -114,19 +112,9 @@ export function DressCanvas({
         </div>
       )}
 
-      {/* Layer 2: warped dress SVG */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: displaySize.w,
-          height: displaySize.h,
-          pointerEvents: 'none',
-          transformOrigin: '0 0',
-          transform: `scale(${svgScaleX}, ${svgScaleY})`,
-        }}
-      >
-        {dressSvg}
+      {/* Layer 2: warped dress SVG — viewBox stays at photo coords, width/height = display */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        {scaledSvg}
       </div>
 
       {/* Layer 3: anchor overlay */}

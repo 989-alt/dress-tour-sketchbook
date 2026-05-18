@@ -92,21 +92,32 @@ export const SketchOverlay = forwardRef<SketchOverlayHandle, SketchOverlayProps>
       },
     }));
 
+    function applyDrawStyle(ctx: CanvasRenderingContext2D, isEraser: boolean, drawColor: string, size: string) {
+      const paint = isEraser ? 'rgba(0,0,0,1)' : COLOR_MAP[drawColor];
+      ctx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
+      ctx.fillStyle = paint;
+      ctx.strokeStyle = paint;
+      ctx.lineWidth = BRUSH_PX[size];
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+    }
+
     function pushUndo(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
       const snap = ctx.getImageData(0, 0, canvas.width, canvas.height);
       if (undoStack.current.length >= UNDO_LIMIT) undoStack.current.shift();
       undoStack.current.push(snap);
     }
 
+    const coordScaleX = photoWidth / displayWidth;
+    const coordScaleY = photoHeight / displayHeight;
+
     function toPhotoCoords(e: PointerEvent<HTMLCanvasElement>) {
       const canvas = canvasRef.current;
       if (!canvas) return null;
       const rect = canvas.getBoundingClientRect();
-      const scaleX = photoWidth / displayWidth;
-      const scaleY = photoHeight / displayHeight;
       return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY,
+        x: (e.clientX - rect.left) * coordScaleX,
+        y: (e.clientY - rect.top) * coordScaleY,
       };
     }
 
@@ -131,15 +142,9 @@ export const SketchOverlay = forwardRef<SketchOverlayHandle, SketchOverlayProps>
       if (!pt) return;
       lastPoint.current = pt;
 
+      applyDrawStyle(ctx, eraser, color, brushSize);
       ctx.beginPath();
       ctx.arc(pt.x, pt.y, BRUSH_PX[brushSize] / 2, 0, Math.PI * 2);
-      if (eraser) {
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.fillStyle = 'rgba(0,0,0,1)';
-      } else {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = COLOR_MAP[color];
-      }
       ctx.fill();
     }
 
@@ -154,45 +159,36 @@ export const SketchOverlay = forwardRef<SketchOverlayHandle, SketchOverlayProps>
       if (!pt) return;
 
       const prev = lastPoint.current ?? pt;
+      applyDrawStyle(ctx, eraser, color, brushSize);
       ctx.beginPath();
       ctx.moveTo(prev.x, prev.y);
       ctx.lineTo(pt.x, pt.y);
-      if (eraser) {
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.strokeStyle = 'rgba(0,0,0,1)';
-      } else {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = COLOR_MAP[color];
-      }
-      ctx.lineWidth = BRUSH_PX[brushSize];
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
       ctx.stroke();
 
       lastPoint.current = pt;
       hasMoved.current = true;
     }
 
-    function onPointerUp(e: PointerEvent<HTMLCanvasElement>) {
-      if (!isDrawing.current) return;
+    function finishStroke(e: PointerEvent<HTMLCanvasElement>) {
       isDrawing.current = false;
       lastPoint.current = null;
       const canvas = canvasRef.current;
       if (!canvas) return;
       canvas.releasePointerCapture(e.pointerId);
       onChange?.(canvas.toDataURL('image/png'));
+    }
+
+    function onPointerUp(e: PointerEvent<HTMLCanvasElement>) {
+      if (!isDrawing.current) return;
+      finishStroke(e);
     }
 
     function onPointerLeave(e: PointerEvent<HTMLCanvasElement>) {
       if (!isDrawing.current || !hasMoved.current) return;
-      isDrawing.current = false;
-      lastPoint.current = null;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      canvas.releasePointerCapture(e.pointerId);
-      onChange?.(canvas.toDataURL('image/png'));
+      finishStroke(e);
     }
 
+    // forwardRef + imperative handle + draw logic = structural floor ~210 lines
     return (
       <canvas
         ref={canvasRef}
