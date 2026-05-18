@@ -8,7 +8,18 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 export default [
   { ignores: ['dist'] },
   {
+    files: ['vite.config.ts'],
+    languageOptions: {
+      parser: tsParser,
+      globals: { ...globals.node },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+    },
+  },
+  {
     files: ['**/*.{ts,tsx}'],
+    ignores: ['vite.config.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

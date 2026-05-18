@@ -6,6 +6,7 @@ import { createDefaultEntry, type AnchorSet, type DressEntry } from '../types';
 import { loadImageWithCorrectOrientation } from '../lib/exif';
 import { debounce } from '../lib/debounce';
 import { defaultAnchors } from '../lib/defaultAnchors';
+import { landmarksToAnchors } from '../lib/pose';
 import { getPinnedTabs, togglePinnedTab } from '../lib/pinnedTabs';
 import { DressCanvas } from '../components/DressCanvas';
 import { ParameterPanel } from '../components/ParameterPanel';
@@ -86,12 +87,24 @@ export default function Edit() {
     hydrate();
   }, [hydrate]);
 
-  // Resolve entry once store is ready
+  // Resolve entry once store is ready. For new entries, wait for photoDims so
+  // anchors are computed against the real image (not the 800x1200 fallback).
   useEffect(() => {
     if (!hydrated) return;
     if (isNew) {
-      const dims = photoDims ?? { w: 800, h: 1200 };
-      const anchors = defaultAnchors(dims.w, dims.h);
+      if (!photoDims) return; // wait for photo to load
+      // Prefer detected pose landmarks; fall back to proportional defaults.
+      let anchors: AnchorSet;
+      if (meta?.poseLandmarks) {
+        anchors = landmarksToAnchors({
+          landmarks: meta.poseLandmarks,
+          confidence: {},
+          imageWidth: photoDims.w,
+          imageHeight: photoDims.h,
+        });
+      } else {
+        anchors = defaultAnchors(photoDims.w, photoDims.h);
+      }
       const newEntry = createDefaultEntry(crypto.randomUUID(), anchors);
       setCurrentEntry(newEntry);
       setCurrentAnchors(anchors);
@@ -107,7 +120,7 @@ export default function Edit() {
       navigate('/');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, isNew, id]);
+  }, [hydrated, isNew, id, photoDims, meta?.poseLandmarks]);
 
   // Load photo dimensions
   useEffect(() => {
@@ -164,10 +177,17 @@ export default function Edit() {
   const handleAnchorReset = useCallback(() => {
     if (!currentEntry) return;
     const d = photoDims ?? { w: 800, h: 1200 };
-    const fresh = defaultAnchors(d.w, d.h);
+    const fresh: AnchorSet = meta?.poseLandmarks
+      ? landmarksToAnchors({
+          landmarks: meta.poseLandmarks,
+          confidence: {},
+          imageWidth: d.w,
+          imageHeight: d.h,
+        })
+      : defaultAnchors(d.w, d.h);
     setCurrentAnchors(fresh);
     handleEntryChange({ anchors: fresh });
-  }, [currentEntry, photoDims, handleEntryChange]);
+  }, [currentEntry, photoDims, meta?.poseLandmarks, handleEntryChange]);
 
   // Keep screen awake while editing a dress entry
   useWakeLock(hydrated && !!currentEntry);
