@@ -9,6 +9,7 @@ import { FABRICS } from '../parts/fabrics';
 import { TEXTURES, slitCutout, trainPath } from '../parts/skirts';
 import { EMBELLISHMENTS } from '../parts/embellishments';
 import { VEIL_LENGTHS } from '../parts/veils';
+import { ACCESSORIES } from '../parts/accessories';
 import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -427,6 +428,42 @@ function renderVeil(
 }
 
 // ---------------------------------------------------------------------------
+// Accessory rendering
+// ---------------------------------------------------------------------------
+
+// Canonical reference head anchor
+const REF_HEAD_TOP_ACCESS = { x: 200, y: 20 };
+
+/**
+ * Render the hair accessory at the head anchor, warped using the same
+ * 3-point affine (headTop, shoulderL, shoulderR) used for veils.
+ */
+function renderAccessory(
+  entry: DressEntry,
+  anchors: AnchorSet,
+  idPrefix: string,
+): ReactElement | null {
+  if (!entry.accessory || entry.accessory === 'none') return null;
+
+  const def = ACCESSORIES[entry.accessory];
+  const colorHex = COLOR_HEX[entry.color.primary];
+
+  const el = def.render({
+    headTopX: REF_HEAD_TOP_ACCESS.x,
+    headTopY: REF_HEAD_TOP_ACCESS.y,
+    color: colorHex,
+    idPrefix: `${idPrefix}acc-`,
+  });
+  if (!el) return null;
+
+  const xform = solveAffine(
+    [REF_HEAD_TOP_ACCESS, REF_SHOULDER_L, REF_SHOULDER_R],
+    [anchors.headTop, anchors.shoulderL, anchors.shoulderR],
+  );
+  return <g transform={toSvgTransform(xform)}>{el}</g>;
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -474,8 +511,10 @@ export function composeDress(
       {renderBackHint(entry, anchors, idPrefix)}
       {/* T18: embellishments layer */}
       {renderEmbellishments(entry, anchors, idPrefix)}
-      {/* T19: veil front layer — top of everything (blusher / front drape) */}
+      {/* T19: veil front layer — on top of dress */}
       {veilFront}
+      {/* T20: hair accessory — topmost element */}
+      {renderAccessory(entry, anchors, idPrefix)}
     </svg>
   );
 }

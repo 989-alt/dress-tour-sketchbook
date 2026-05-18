@@ -4,7 +4,7 @@ import { composeDress } from './compose';
 import { COLOR_HEX } from './colorPalette';
 import { createDefaultEntry } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
-import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial, BackType, FabricType, SkirtTexture } from '../types';
+import type { AnchorSet, SilhouetteType, SleeveType, SleeveMaterial, BackType, FabricType, SkirtTexture, AccessoryType } from '../types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -1001,6 +1001,65 @@ describe('composeDress — veil (T19)', () => {
     for (const edge of edges) {
       const entry = createDefaultEntry(`t19-edge-${edge}`, anchors);
       entry.veil = { length: 'chapel', edge, layers: 1 };
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test T20: Accessory layer Z-order and rendering
+// ---------------------------------------------------------------------------
+describe('composeDress — accessories (T20)', () => {
+  it('accessory=none: no data-accessory element rendered', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t20-none', anchors);
+    entry.accessory = 'none';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-accessory=');
+  });
+
+  it('accessory=tiara: renders data-accessory="tiara" in output', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t20-tiara', anchors);
+    entry.accessory = 'tiara';
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-accessory="tiara"');
+  });
+
+  it('tiara accessory layer appears after veilFront in Z-order (topmost)', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t20-zorder', anchors);
+    entry.accessory = 'tiara';
+    entry.veil = { length: 'waltz', edge: 'cut', layers: 2 };
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    const veilFrontIdx = html.lastIndexOf('data-veil-layer="front"');
+    const accessoryIdx = html.lastIndexOf('data-accessory="tiara"');
+    expect(veilFrontIdx).toBeGreaterThanOrEqual(0);
+    expect(accessoryIdx).toBeGreaterThanOrEqual(0);
+    expect(accessoryIdx).toBeGreaterThan(veilFrontIdx);
+  });
+
+  it('tiara accessory layer appears after embellishments in output', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t20-zorder-emb', anchors);
+    entry.accessory = 'tiara';
+    entry.embellishments = [{ type: 'pearls', region: 'bodice', intensity: 2 }];
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    const embIdx = html.indexOf('data-embellishment="pearls"');
+    const accIdx = html.lastIndexOf('data-accessory="tiara"');
+    expect(embIdx).toBeGreaterThanOrEqual(0);
+    expect(accIdx).toBeGreaterThanOrEqual(0);
+    expect(accIdx).toBeGreaterThan(embIdx);
+  });
+
+  it('all 6 accessory types render without throwing', () => {
+    const types: AccessoryType[] = ['none', 'tiara', 'headband', 'hairVine', 'hairComb', 'floralCrown'];
+    const anchors = anchorSetFromRef('aline');
+    for (const accessory of types) {
+      const entry = createDefaultEntry(`t20-all-${accessory}`, anchors);
+      entry.accessory = accessory;
       expect(() =>
         renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
       ).not.toThrow();
