@@ -137,4 +137,72 @@ describe('Summary route', () => {
     expect(screen.getByText('이미지로 내보내기')).toBeInTheDocument();
     expect(screen.getByText('JSON 받기')).toBeInTheDocument();
   });
+
+  it('renders the compare toggle button', () => {
+    useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
+    renderSummary();
+    expect(screen.getByText('비교')).toBeInTheDocument();
+  });
+
+  it('entering compare mode shows the action bar', () => {
+    useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
+    renderSummary();
+    fireEvent.click(screen.getByText('비교'));
+    expect(screen.getByText(/비교할 드레스 2개를 선택하세요/)).toBeInTheDocument();
+  });
+
+  it('selecting one card in compare mode shows 1개 선택됨', () => {
+    const entries = makeEntries();
+    useAppStore.setState({ meta: FAKE_META, entries, hydrated: true });
+    renderSummary();
+    fireEvent.click(screen.getByText('비교'));
+    // Click the card for 드레스 X
+    const card = screen.getByText('드레스 X').closest('button');
+    fireEvent.click(card!);
+    expect(screen.getByText(/1개 선택됨/)).toBeInTheDocument();
+  });
+
+  it('비교하기 button is disabled until 2 cards are selected', () => {
+    const entries = makeEntries();
+    useAppStore.setState({ meta: FAKE_META, entries, hydrated: true });
+    renderSummary();
+    fireEvent.click(screen.getByText('비교'));
+    const compareBtn = screen.getByText('비교하기');
+    expect(compareBtn).toBeDisabled();
+  });
+
+  it('selecting 2 cards enables the 비교하기 button', () => {
+    const entries = makeEntries();
+    useAppStore.setState({ meta: FAKE_META, entries, hydrated: true });
+    renderSummary();
+    fireEvent.click(screen.getByText('비교'));
+    const cardX = screen.getByText('드레스 X').closest('button');
+    const cardY = screen.getByText('드레스 Y').closest('button');
+    fireEvent.click(cardX!);
+    fireEvent.click(cardY!);
+    const compareBtn = screen.getByText('비교하기');
+    expect(compareBtn).not.toBeDisabled();
+  });
+
+  it('clicking 비교하기 opens the compare modal', () => {
+    const entries = makeEntries();
+    useAppStore.setState({ meta: FAKE_META, entries, hydrated: true });
+    renderSummary();
+    fireEvent.click(screen.getByText('비교'));
+    const cardX = screen.getByText('드레스 X').closest('button');
+    const cardY = screen.getByText('드레스 Y').closest('button');
+    fireEvent.click(cardX!);
+    fireEvent.click(cardY!);
+    fireEvent.click(screen.getByText('비교하기'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('clicking 비교 button again exits compare mode', () => {
+    useAppStore.setState({ meta: FAKE_META, entries: [], hydrated: true });
+    renderSummary();
+    fireEvent.click(screen.getByText('비교'));
+    expect(screen.getByText(/비교할 드레스 2개를 선택하세요/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText('비교'));
+    expect(screen.queryByText(/비교할 드레스 2개를 선택하세요/)).not.toBeInTheDocument();
+  });
 });

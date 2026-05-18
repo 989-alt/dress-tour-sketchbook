@@ -1,16 +1,60 @@
-import { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
 import { PhotoUploadModal } from '../components/PhotoUploadModal';
 import { EntryCard } from '../components/EntryCard';
+import { exportAllToJson, downloadJsonFile, importFromJson } from '../lib/exportJson';
 
 export default function Home() {
   const navigate = useNavigate();
   const meta = useAppStore((s) => s.meta);
   const entries = useAppStore((s) => s.entries);
+  const { setMeta, upsertEntry } = useAppStore();
   const [showUpload, setShowUpload] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const hasPhoto = Boolean(meta?.basePhoto);
+
+  async function handleJsonExport() {
+    try {
+      const json = await exportAllToJson(meta, entries);
+      await downloadJsonFile(json);
+    } catch {
+      alert('JSON 내보내기에 실패했습니다.');
+    }
+  }
+
+  function handleJsonImportClick() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset so same file can be re-imported
+    e.target.value = '';
+
+    const text = await file.text();
+    let imported: Awaited<ReturnType<typeof importFromJson>>;
+    try {
+      imported = await importFromJson(text);
+    } catch (err) {
+      const msg = (err as { message?: string }).message ?? '알 수 없는 오류';
+      alert(`가져오기 실패: ${msg}`);
+      return;
+    }
+
+    const confirmed = window.confirm('기존 데이터를 덮어쓰시겠어요?');
+    if (!confirmed) return;
+
+    if (imported.meta) {
+      await setMeta(imported.meta);
+    }
+    for (const entry of imported.entries) {
+      await upsertEntry(entry);
+    }
+    alert(`가져오기 완료 (드레스 ${imported.entries.length}개)`);
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -80,18 +124,28 @@ export default function Home() {
           요약 보기
         </button>
         <button
-          onClick={() => alert('T21에서 구현 예정')}
+          onClick={handleJsonExport}
           className="text-sm text-gray-500 hover:text-gray-800"
         >
           JSON 받기
         </button>
         <button
-          onClick={() => alert('T21에서 구현 예정')}
+          onClick={handleJsonImportClick}
           className="text-sm text-gray-500 hover:text-gray-800"
         >
           JSON 복원
         </button>
       </footer>
+
+      {/* Hidden file input for JSON import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json"
+        className="hidden"
+        onChange={handleFileChange}
+        aria-hidden="true"
+      />
 
       {showUpload && <PhotoUploadModal onClose={() => setShowUpload(false)} />}
     </div>

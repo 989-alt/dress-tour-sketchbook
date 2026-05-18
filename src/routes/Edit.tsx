@@ -5,6 +5,7 @@ import { createDefaultEntry, type AnchorSet, type DressEntry } from '../types';
 import { loadImageWithCorrectOrientation } from '../lib/exif';
 import { debounce } from '../lib/debounce';
 import { defaultAnchors } from '../lib/defaultAnchors';
+import { getPinnedTabs, togglePinnedTab } from '../lib/pinnedTabs';
 import { DressCanvas } from '../components/DressCanvas';
 import { ParameterPanel } from '../components/ParameterPanel';
 import { BasicPanel } from '../components/panels/BasicPanel';
@@ -55,6 +56,18 @@ export default function Edit() {
   const [activeTab, setActiveTab] = useState<TabId>('basic');
   const [manualMode, setManualMode] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [pinnedTabs, setPinnedTabs] = useState<string[]>(() => getPinnedTabs());
+
+  const sortedTabs = useMemo(() => {
+    const pinned = TABS.filter((t) => pinnedTabs.includes(t.id));
+    const unpinned = TABS.filter((t) => !pinnedTabs.includes(t.id));
+    return [...pinned, ...unpinned];
+  }, [pinnedTabs]);
+
+  function handlePinToggle(id: string) {
+    togglePinnedTab(id);
+    setPinnedTabs(getPinnedTabs());
+  }
 
   // Pen state
   const [brushSize, setBrushSize] = useState<'thin' | 'medium' | 'thick'>('medium');
@@ -325,9 +338,11 @@ export default function Edit() {
         {/* Right: panels ~40% */}
         <div className="w-2/5 border-l border-gray-200 flex flex-col" aria-label="parameter-panel-area">
           <ParameterPanel
-            tabs={TABS}
+            tabs={sortedTabs}
             activeId={activeTab}
             onActiveChange={(id) => setActiveTab(id as TabId)}
+            pinnedTabIds={pinnedTabs}
+            onPinToggle={handlePinToggle}
           >
             {renderPanel()}
           </ParameterPanel>
