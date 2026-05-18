@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { DressEntry, AnchorSet, FabricType, ColorEnum } from '../types';
+import type { DressEntry, AnchorSet, FabricType, ColorEnum, Point, Region } from '../types';
 import { SILHOUETTES } from '../parts/silhouettes';
 import { NECKLINES } from '../parts/necklines';
 import { SLEEVES } from '../parts/sleeves';
@@ -7,6 +7,7 @@ import { STRUCTURES, ACCENTS, WAIST_Y_OFFSET } from '../parts/bodices';
 import { BACKS } from '../parts/backs';
 import { FABRICS } from '../parts/fabrics';
 import { TEXTURES, slitCutout, trainPath } from '../parts/skirts';
+import { EMBELLISHMENTS } from '../parts/embellishments';
 import { meshWarp, solveAffine, toSvgTransform } from './warp';
 import { COLOR_HEX } from './colorPalette';
 
@@ -285,6 +286,98 @@ function renderTrain(
 }
 
 // ---------------------------------------------------------------------------
+// Embellishments
+// ---------------------------------------------------------------------------
+
+// Default whole-body polygon for 'allover' region
+const ALLOVER_POLYGON: Point[] = [
+  { x: 100, y: 120 },
+  { x: 300, y: 120 },
+  { x: 300, y: 780 },
+  { x: 100, y: 780 },
+];
+
+// Which three canonical anchors to use for the warp per region
+const REGION_WARP: Record<Region, [Point, Point, Point]> = {
+  bodice:  [REF_SHOULDER_L, REF_SHOULDER_R, REF_WAIST],
+  waist:   [REF_SHOULDER_L, REF_SHOULDER_R, REF_WAIST],
+  skirt:   [REF_WAIST_SKIRT, REF_HIP_L, REF_HIP_R],
+  sleeves: [REF_SHOULDER_L, REF_SHOULDER_R, REF_BUST],
+  train:   [REF_SHOULDER_L, REF_SHOULDER_R, REF_WAIST],
+  allover: [REF_SHOULDER_L, REF_SHOULDER_R, REF_WAIST],
+};
+
+/** Render all embellishment overlays for the entry. */
+function renderEmbellishments(
+  entry: DressEntry,
+  anchors: AnchorSet,
+  idPrefix: string,
+): ReactElement[] {
+  if (!entry.embellishments?.length) return [];
+
+  const silDef = SILHOUETTES[entry.silhouette];
+  const accentHex = COLOR_HEX[entry.color.accent];
+
+  return entry.embellishments
+    .filter((emb) => emb.intensity > 0)
+    .map((emb, idx) => {
+      const def = EMBELLISHMENTS[emb.type];
+      const intensity = emb.intensity as 1 | 2 | 3 | 4 | 5;
+
+      // Find region polygons
+      let polygons: Point[][];
+      if (emb.region === 'allover') {
+        polygons = [ALLOVER_POLYGON];
+      } else {
+        const regionDef = silDef.regions.find((r) => r.name === emb.region);
+        polygons = regionDef?.polygons ?? [ALLOVER_POLYGON];
+      }
+
+      const embEl = def.render({
+        intensity,
+        region: emb.region,
+        polygons,
+        color: accentHex,
+        extra: emb.extra,
+        idPrefix: `${idPrefix}emb${idx}-`,
+      });
+
+      // Apply affine warp for this region
+      const [src0, src1, src2] = REGION_WARP[emb.region];
+      const dstAnchors: Record<string, Point> = {
+        REF_SHOULDER_L: anchors.shoulderL,
+        REF_SHOULDER_R: anchors.shoulderR,
+        REF_WAIST: anchors.waist,
+        REF_BUST: anchors.bust,
+        REF_HIP_L: anchors.hipL,
+        REF_HIP_R: anchors.hipR,
+      };
+      // Map src points to dst anchor points
+      const srcToKey = (p: Point): Point => {
+        if (p === REF_SHOULDER_L) return anchors.shoulderL;
+        if (p === REF_SHOULDER_R) return anchors.shoulderR;
+        if (p === REF_WAIST || p === REF_WAIST_SKIRT) return anchors.waist;
+        if (p === REF_BUST) return anchors.bust;
+        if (p === REF_HIP_L) return anchors.hipL;
+        if (p === REF_HIP_R) return anchors.hipR;
+        return p;
+      };
+      void dstAnchors; // suppress unused warning
+
+      const xform = solveAffine(
+        [src0, src1, src2],
+        [srcToKey(src0), srcToKey(src1), srcToKey(src2)],
+      );
+
+      return (
+        <g key={`${idPrefix}emb-layer-${idx}`} transform={toSvgTransform(xform)}>
+          {embEl}
+        </g>
+      );
+    });
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -325,7 +418,8 @@ export function composeDress(
       {renderAccent(entry, anchors)}
       {/* T14: back hint layer */}
       {renderBackHint(entry, anchors, idPrefix)}
-      {/* T18+ embellishments go here */}
+      {/* T18: embellishments layer */}
+      {renderEmbellishments(entry, anchors, idPrefix)}
     </svg>
   );
 }

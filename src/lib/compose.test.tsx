@@ -779,6 +779,106 @@ describe('composeDress — slit cutout (T17)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Test T18: Embellishments layer
+// ---------------------------------------------------------------------------
+describe('composeDress — embellishments (T18)', () => {
+  it('pearls on bodice at intensity=3 renders data-embellishment=pearls', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t18-pearls', anchors);
+    entry.embellishments = [{ type: 'pearls', region: 'bodice', intensity: 3 }];
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-embellishment="pearls"');
+  });
+
+  it('crystals on skirt at intensity=2 renders data-embellishment=crystals', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t18-crystals', anchors);
+    entry.embellishments = [{ type: 'crystals', region: 'skirt', intensity: 2 }];
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-embellishment="crystals"');
+  });
+
+  it('intensity=0 embellishment is not rendered', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t18-zero', anchors);
+    entry.embellishments = [{ type: 'beads', region: 'bodice', intensity: 0 }];
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-embellishment="beads"');
+  });
+
+  it('empty embellishments array renders without error and has no embellishment markers', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t18-empty', anchors);
+    entry.embellishments = [];
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).not.toContain('data-embellishment=');
+  });
+
+  it('multiple embellishments all render their markers', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t18-multi', anchors);
+    entry.embellishments = [
+      { type: 'pearls', region: 'bodice', intensity: 3 },
+      { type: 'sequins', region: 'skirt', intensity: 1 },
+      { type: 'embroidery', region: 'waist', intensity: 2 },
+    ];
+    const html = renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS));
+    expect(html).toContain('data-embellishment="pearls"');
+    expect(html).toContain('data-embellishment="sequins"');
+    expect(html).toContain('data-embellishment="embroidery"');
+  });
+
+  it('allover region renders without throwing', () => {
+    const anchors = anchorSetFromRef('aline');
+    const entry = createDefaultEntry('t18-allover', anchors);
+    entry.embellishments = [{ type: 'beads', region: 'allover', intensity: 2 }];
+    expect(() =>
+      renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+    ).not.toThrow();
+  });
+
+  it('all 9 embellishment types render without throwing', () => {
+    const types = [
+      'beads', 'laceApplique', 'threeDFlorals', 'crystals', 'pearls',
+      'embroidery', 'sequins', 'ribbons', 'decorativeButtons',
+    ] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const type of types) {
+      const entry = createDefaultEntry(`t18-type-${type}`, anchors);
+      entry.embellishments = [{ type, region: 'bodice', intensity: 2 }];
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+
+  it('all 6 regions render without throwing for beads', () => {
+    const regions = ['bodice', 'waist', 'skirt', 'sleeves', 'train', 'allover'] as const;
+    const anchors = anchorSetFromRef('aline');
+    for (const region of regions) {
+      const entry = createDefaultEntry(`t18-region-${region}`, anchors);
+      entry.embellishments = [{ type: 'beads', region, intensity: 1 }];
+      expect(() =>
+        renderToStaticMarkup(composeDress(entry, anchors, DEFAULT_OPTIONS)),
+      ).not.toThrow();
+    }
+  });
+
+  it('intensity=3 pearls have more circle elements than intensity=1', () => {
+    const anchors = anchorSetFromRef('aline');
+    const e1 = createDefaultEntry('t18-dense-1', anchors);
+    e1.embellishments = [{ type: 'pearls', region: 'bodice', intensity: 1 }];
+    const e3 = createDefaultEntry('t18-dense-3', anchors);
+    e3.embellishments = [{ type: 'pearls', region: 'bodice', intensity: 3 }];
+    const html1 = renderToStaticMarkup(composeDress(e1, anchors, DEFAULT_OPTIONS));
+    const html3 = renderToStaticMarkup(composeDress(e3, anchors, DEFAULT_OPTIONS));
+    const count1 = (html1.match(/<circle/g) ?? []).length;
+    const count3 = (html3.match(/<circle/g) ?? []).length;
+    expect(count3).toBeGreaterThan(count1);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Test 19 (T17): Train rendering
 // ---------------------------------------------------------------------------
 describe('composeDress — train (T17)', () => {
